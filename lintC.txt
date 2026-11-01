@@ -1,9 +1,0 @@
-internal\tools\tools_test.go:167:2: require-error: for error assertions use require (testifylint)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
-	^
-internal\tools\tools_test.go:181:2: require-error: for error assertions use require (testifylint)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
-	^
-internal\tools\argv_test.go:203:2: require-error: for error assertions use require (testifylint)
-	assert.ErrorIs(t, err, ErrStageForbidden)
-	^

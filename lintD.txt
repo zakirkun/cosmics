@@ -1,9 +1,0 @@
-internal\domain\engagement_test.go:280:4: require-error: for error assertions use require (testifylint)
-			assert.ErrorIs(t, err, domain.ErrUnknownStage)
-			^
-internal\domain\engagement_test.go:281:4: require-error: for error assertions use require (testifylint)
-			assert.NotErrorIs(t, err, domain.ErrIllegalMove)
-			^
-internal\domain\event_reject_test.go:88:4: require-error: for error assertions use require (testifylint)
-			assert.ErrorIs(t, err, domain.ErrEmptyMessage)
-			^

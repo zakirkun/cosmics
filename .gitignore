@@ -8,6 +8,8 @@ coverage.out
 coverage.html
 *.test
 *.prof
+lint*.txt
+*_out.txt
 
 # IDE
 .idea/
