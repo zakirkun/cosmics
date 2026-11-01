@@ -154,9 +154,7 @@ func (d *DockerExecutor) Run(ctx context.Context, spec RunSpec, sink StreamSink)
 
 	collector := newOutputCollector(spec.MaxOutput())
 
-	var (
-		wg sync.WaitGroup
-	)
+	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
