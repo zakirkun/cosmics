@@ -1,0 +1,43 @@
+id: httpx
+category: web
+display_name: httpx
+image: cosmics/kali-tools:latest
+binary: httpx
+version_cmd: ["httpx", "-version"]
+arg_schema:
+  type: object
+  additionalProperties: false
+  required: ["target"]
+  properties:
+    target:
+      type: string
+      minLength: 1
+      maxLength: 255
+    status_codes:
+      type: boolean
+    tech_detect:
+      type: boolean
+    title:
+      type: boolean
+    threads:
+      type: integer
+      minimum: 1
+      maximum: 100
+command_template: >-
+  httpx -json -no-color -silent
+  {{if .status_codes}}-status-code{{end}}
+  {{if .tech_detect}}-tech-detect{{end}}
+  {{if .title}}-title{{end}}
+  {{if .threads}}-threads {{q .threads}}{{end}}
+  -u {{q .target}}
+capabilities: [HTTP_PROBE, TECH_FINGERPRINT]
+network_mode: bridge
+default_timeout_s: 180
+max_output_bytes: 262144
+danger_level: safe
+requires_approval: false
+parser: jsonl
+fidelity_caveats:
+  - "Reports only what an unauthenticated GET observes; authenticated surfaces are invisible to it."
+notes: Fast HTTP liveness and technology fingerprinting.
+enabled: true

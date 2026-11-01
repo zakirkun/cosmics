@@ -1,0 +1,37 @@
+id: subfinder
+category: osint
+display_name: Subfinder
+image: cosmics/kali-tools:latest
+binary: subfinder
+version_cmd: ["subfinder", "-version"]
+arg_schema:
+  type: object
+  additionalProperties: false
+  required: ["domain"]
+  properties:
+    domain:
+      type: string
+      minLength: 3
+      maxLength: 253
+      pattern: '^[A-Za-z0-9][A-Za-z0-9.-]*$'
+    all_sources:
+      type: boolean
+    recursive:
+      type: boolean
+command_template: >-
+  subfinder -silent -json
+  {{if .all_sources}}-all{{end}}
+  {{if .recursive}}-recursive{{end}}
+  -d {{q .domain}}
+capabilities: [SUBDOMAIN_ENUM]
+network_mode: bridge
+default_timeout_s: 300
+max_output_bytes: 262144
+danger_level: safe
+requires_approval: false
+parser: jsonl
+fidelity_caveats:
+  - "Passive only: results depend on which third-party sources are reachable and rate-limited."
+  - "A subdomain absent from every source is not proof that it does not exist."
+notes: Passive subdomain enumeration from public sources.
+enabled: true

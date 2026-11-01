@@ -1,0 +1,46 @@
+id: ffuf
+category: web
+display_name: ffuf
+image: cosmics/kali-tools:latest
+binary: ffuf
+version_cmd: ["ffuf", "-V"]
+arg_schema:
+  type: object
+  additionalProperties: false
+  required: ["target", "wordlist"]
+  properties:
+    target:
+      type: string
+      minLength: 1
+      maxLength: 255
+    wordlist:
+      type: string
+      minLength: 1
+      maxLength: 255
+      pattern: '^[A-Za-z0-9][A-Za-z0-9._/-]*$'
+    filter_status:
+      type: string
+      maxLength: 128
+      pattern: '^[0-9,]+$'
+    threads:
+      type: integer
+      minimum: 1
+      maximum: 100
+command_template: >-
+  ffuf -s -json -noninteractive
+  {{if .filter_status}}-fc {{q .filter_status}}{{end}}
+  {{if .threads}}-t {{q .threads}}{{end}}
+  -w {{q .wordlist}}
+  -u {{q .target}}
+capabilities: [DIR_BRUTE]
+network_mode: bridge
+default_timeout_s: 900
+max_output_bytes: 524288
+danger_level: intrusive
+requires_approval: false
+parser: jsonl
+fidelity_caveats:
+  - "Results are bounded by the supplied wordlist: a missed path is not evidence of absence."
+  - "High thread counts can trip rate limiting or WAF blocking, which looks like a 403 on every path."
+notes: Content and directory discovery against a wordlist.
+enabled: true

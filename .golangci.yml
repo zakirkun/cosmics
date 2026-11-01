@@ -1,0 +1,109 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    # Correctness
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - sqlclosecheck
+    - rowserrcheck
+    - nilerr
+    - nilnil
+    - contextcheck
+    - errorlint
+    - exhaustive
+    - copyloopvar
+    - durationcheck
+    - makezero
+    - reassign
+
+    # Style and maintainability
+    - revive
+    - gocritic
+    - misspell
+    - unconvert
+    - unparam
+    - goconst
+    - prealloc
+    - predeclared
+    - whitespace
+
+    # Security
+    - gosec
+
+    # Test quality
+    - thelper
+    - tparallel
+    - testifylint
+
+  settings:
+    exhaustive:
+      check:
+        - switch
+        - map
+      default-signifies-exhaustive: false
+
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+      disabled-checks:
+        # Named returns with deferred close mutate the error; the pattern is
+        # documented in the programming reference and is intentional.
+        - unnamedResult
+
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+        - name: var-naming
+        - name: package-comments
+          disabled: true
+        - name: indent-error-flow
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+
+    gosec:
+      excludes:
+        # G304 file inclusion via variable is inherent: the data dir is
+        # operator-controlled configuration.
+        - G304
+
+    testifylint:
+      enable-all: true
+
+  exclusions:
+    rules:
+      # Test files may use longer functions and many table rows.
+      - path: _test\.go
+        linters:
+          - goconst
+          - unparam
+          - gosec
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/cosmics/cosmics

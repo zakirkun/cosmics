@@ -1,0 +1,55 @@
+version: "3"
+
+vars:
+  BIN_DIR: ./bin
+  MAIN: ./cmd/cosmics
+
+tasks:
+  default:
+    desc: Format, lint, test, and build
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: test
+      - task: build
+
+  fmt:
+    desc: Format all Go sources
+    cmds:
+      - gofumpt -w .
+      - goimports -w -local github.com/cosmics/cosmics .
+
+  fmt:check:
+    desc: Fail when any file is unformatted
+    cmds:
+      - gofumpt -l . | grep . && exit 1 || exit 0
+
+  lint:
+    desc: Vet plus static analysis
+    cmds:
+      - go vet ./...
+      - golangci-lint run --timeout 5m ./...
+
+  test:
+    desc: Unit tests with race detector
+    cmds:
+      - go test -race -shuffle=on -count=1 ./...
+
+  test:cover:
+    desc: Coverage report to coverage.html
+    cmds:
+      - go test -race -shuffle=on -count=1 -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -trimpath -ldflags="-s -w" -o {{.BIN_DIR}}/cosmics {{.MAIN}}
+
+  ci:
+    desc: Exactly what CI runs
+    cmds:
+      - task: fmt:check
+      - task: lint
+      - task: test
+      - task: build

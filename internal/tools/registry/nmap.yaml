@@ -1,0 +1,47 @@
+id: nmap
+category: network
+display_name: Nmap
+image: cosmics/kali-tools:latest
+binary: nmap
+version_cmd: ["nmap", "--version"]
+arg_schema:
+  type: object
+  additionalProperties: false
+  required: ["target"]
+  properties:
+    target:
+      type: string
+      minLength: 1
+      maxLength: 255
+      pattern: '^[A-Za-z0-9][A-Za-z0-9._:/-]*$'
+    ports:
+      type: string
+      maxLength: 128
+      pattern: '^[0-9,\-]+$'
+    service_detection:
+      type: boolean
+    os_detection:
+      type: boolean
+    top_ports:
+      type: integer
+      minimum: 1
+      maximum: 65535
+command_template: >-
+  nmap -oX - --stats-every 10s
+  {{if .service_detection}}-sV{{end}}
+  {{if .os_detection}}-O{{end}}
+  {{if .ports}}-p {{q .ports}}{{end}}
+  {{if .top_ports}}--top-ports {{q .top_ports}}{{end}}
+  {{q .target}}
+capabilities: [PORT_SCAN, SERVICE_DETECT, OS_DETECT]
+network_mode: bridge
+default_timeout_s: 600
+max_output_bytes: 524288
+danger_level: safe
+requires_approval: false
+parser: nmap_xml
+fidelity_caveats:
+  - "Runs without CAP_NET_RAW, so only TCP connect scanning is available; SYN scanning and OS detection will report incomplete results."
+  - "UDP scanning is not offered because it is unreliable without raw sockets."
+notes: Primary port and service discovery tool.
+enabled: true

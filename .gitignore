@@ -1,0 +1,30 @@
+# Build output
+/bin/
+cosmics
+cosmics.exe
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+*.prof
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local configuration and secrets — never committed
+.env
+.env.local
+config.yaml
+*.pem
+*.key
+
+# Runtime data
+/.cosmics/
+*.db
+*.db-wal
+*.db-shm
+
+.omo/

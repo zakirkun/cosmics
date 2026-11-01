@@ -1,0 +1,71 @@
+app:
+  operator: "your-name"
+  data_dir: "~/.cosmics"
+  log_level: info
+  theme: dark
+
+providers:
+  9router:
+    kind: openai_compatible
+    base_url: "http://localhost:20128/v1"
+    api_key_env: NINEROUTER_KEY
+    timeout_s: 120
+    max_retries: 2
+
+model_profiles:
+  default:
+    recon:
+      - { provider: 9router, model: "astral-projection", max_tokens: 4096 }
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 4096 }
+
+    osint:
+      - { provider: 9router, model: "astral-projection", max_tokens: 4096 }
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 4096 }
+
+    analysis:
+      - { provider: 9router, model: "astral-projection", max_tokens: 8192, reasoning: { effort: high } }
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 8192 }
+
+    mapper:
+      - { provider: 9router, model: "astral-projection", max_tokens: 8192 }
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 8192 }
+
+    exploit:
+      - { provider: 9router, model: "astral-projection", max_tokens: 8192, reasoning: { effort: high } }
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 8192 }
+
+    reporting:
+      - { provider: 9router, model: "astral-projection", max_tokens: 16384 }
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 16384 }
+
+    compact:
+      - { provider: 9router, model: "cutad/deepseek-v4.1-flash", max_tokens: 2048 }
+      - { provider: 9router, model: "astral-projection", max_tokens: 2048 }
+
+tools:
+  default_timeout_s: 300
+  max_output_bytes: 262144
+  workspace_retention_days: 0
+
+exploit:
+  auto_approve_intrusive: false
+  approval_timeout_s: 300
+  max_attempts_per_path: 3
+
+memory:
+  retrieval_mode: keyword
+  top_k: 8
+  token_budget: 6000
+  compaction_threshold: 0.75
+  embeddings:
+    enabled: false
+    provider: ""
+    model: ""
+    dimensions: 0
+
+osint:
+  enabled_sources: [crtsh, dns, rdap, wayback, github]
+  api_keys_env:
+    shodan: SHODAN_API_KEY
+    censys: CENSYS_API_ID
+    virustotal: VT_API_KEY
