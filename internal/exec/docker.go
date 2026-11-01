@@ -84,7 +84,7 @@ func (d *DockerExecutor) Ping(ctx context.Context) error {
 	probeCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(probeCtx, d.docker, "version", "--format", "{{.Server.Version}}")
+	cmd := exec.CommandContext(probeCtx, d.docker, "version", "--format", "{{.Server.Version}}") // #nosec G204 -- docker path is operator-configured and args are constants
 	output, err := cmd.Output()
 	if err != nil {
 		return fmt.Errorf("docker daemon unreachable: %w: %w", ErrDockerUnavailable, err)
@@ -101,12 +101,12 @@ func (d *DockerExecutor) EnsureImage(ctx context.Context, image string) error {
 		return fmt.Errorf("ensure image: image is empty: %w", ErrImageMissing)
 	}
 
-	inspect := exec.CommandContext(ctx, d.docker, "image", "inspect", image)
+	inspect := exec.CommandContext(ctx, d.docker, "image", "inspect", image) // #nosec G204 -- image is validated by RunSpec.Validate to reject leading "-"
 	if err := inspect.Run(); err == nil {
 		return nil
 	}
 
-	pull := exec.CommandContext(ctx, d.docker, "pull", image)
+	pull := exec.CommandContext(ctx, d.docker, "pull", image) // #nosec G204 -- image is validated by RunSpec.Validate to reject leading "-"
 	if output, err := pull.CombinedOutput(); err != nil {
 		return fmt.Errorf("pull %s: %w: %s", image, ErrImageMissing, strings.TrimSpace(string(output)))
 	}
@@ -137,7 +137,7 @@ func (d *DockerExecutor) Run(ctx context.Context, spec RunSpec, sink StreamSink)
 	started := d.clock.Now()
 	startedWall := time.Now()
 
-	cmd := exec.CommandContext(runCtx, d.docker, args...)
+	cmd := exec.CommandContext(runCtx, d.docker, args...) // #nosec G204 -- argv comes from validated RunSpec fields; no shell
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
@@ -169,7 +169,7 @@ func (d *DockerExecutor) Run(ctx context.Context, spec RunSpec, sink StreamSink)
 	deadline := time.AfterFunc(timeout, func() {
 		timedOut = true
 		cancel()
-		d.killByLabel(runID)
+		d.killByLabel(ctx, runID)
 	})
 
 	waitErr := cmd.Wait()
@@ -274,20 +274,24 @@ func (d *DockerExecutor) buildArgs(spec RunSpec, runID string) []string {
 const domainNetworkBridge = "bridge"
 
 // killByLabel force-removes every container created by this run.
-func (d *DockerExecutor) killByLabel(runID string) {
-	ctx, cancel := context.WithTimeout(context.Background(), killGrace)
+//
+// The kill deliberately ignores the caller's cancellation: the run has already
+// been cancelled, and the container must still be reaped. A fresh bounded context
+// is the only way to guarantee the cleanup attempt survives.
+func (d *DockerExecutor) killByLabel(parent context.Context, runID string) { //nolint:contextcheck // cleanup must outlive the cancelled parent
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(parent), killGrace)
 	defer cancel()
 
 	filter := "label=" + RunLabel + "=" + runID
 
-	list := exec.CommandContext(ctx, d.docker, "ps", "--quiet", "--filter", filter)
+	list := exec.CommandContext(ctx, d.docker, "ps", "--quiet", "--filter", filter) // #nosec G204 -- filter derives from the run label
 	output, err := list.Output()
 	if err != nil {
 		return
 	}
 
 	for _, id := range strings.Fields(string(output)) {
-		kill := exec.CommandContext(ctx, d.docker, "kill", id)
+		kill := exec.CommandContext(ctx, d.docker, "kill", id) // #nosec G204 -- id comes from docker ps output
 		if err := kill.Run(); err != nil {
 			continue
 		}
@@ -301,7 +305,7 @@ func (d *DockerExecutor) Reap(ctx context.Context) (int, error) {
 		"--filter", "status=exited",
 	}
 
-	list := exec.CommandContext(ctx, d.docker, append([]string{"ps", "--quiet", "--all"}, filters...)...)
+	list := exec.CommandContext(ctx, d.docker, append([]string{"ps", "--quiet", "--all"}, filters...)...) // #nosec G204 -- filters are literal label selectors
 	output, err := list.Output()
 	if err != nil {
 		return 0, fmt.Errorf("list orphaned containers: %w: %w", ErrDockerUnavailable, err)
@@ -309,7 +313,7 @@ func (d *DockerExecutor) Reap(ctx context.Context) (int, error) {
 
 	ids := strings.Fields(string(output))
 	for _, id := range ids {
-		remove := exec.CommandContext(ctx, d.docker, "rm", "--force", id)
+		remove := exec.CommandContext(ctx, d.docker, "rm", "--force", id) // #nosec G204 -- id comes from docker ps output
 		if err := remove.Run(); err != nil {
 			return 0, fmt.Errorf("remove container %s: %w: %w", id, ErrRunFailed, err)
 		}

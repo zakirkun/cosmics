@@ -112,7 +112,7 @@ func Test_Engagement_Authorize_ReturnsIllegalMove_when_StatusIsNotDraft(t *testi
 			got, err := before.Authorize(t4)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.True(t, before.Status.Valid())
 			assert.NotEqual(t, domain.StatusDraft, before.Status)
@@ -169,7 +169,7 @@ func Test_Engagement_Complete_ReturnsIllegalMove_when_StatusIsDraftOrReady(t *te
 			got, err := before.Complete(t3)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.NotEqual(t, domain.StatusCompleted, before.Status)
 			assert.True(t, before.FinishedAt.IsZero(), "a rejected completion must not stamp the finish instant")
@@ -210,7 +210,7 @@ func Test_Engagement_AdvanceTo_ReturnsIllegalMove_when_StageIsExcludedByMode(t *
 			got, err := e.AdvanceTo(tt.stage, t3)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.Equal(t, before, e.Stage)
 			assert.Equal(t, t2, e.UpdatedAt)
@@ -250,7 +250,7 @@ func Test_Engagement_AdvanceTo_ReturnsIllegalMove_when_StatusIsNotRunning(t *tes
 			got, err := before.AdvanceTo(domain.StageOSINT, t4)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.Equal(t, tt.wantStage, before.Stage, "a rejected advance must not move the pointer")
 		})
@@ -277,8 +277,8 @@ func Test_Engagement_AdvanceTo_ReturnsUnknownStage_when_StageIsUndeclared(t *tes
 			got, err := e.AdvanceTo(tt.stage, t3)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrUnknownStage)
-			assert.NotErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrUnknownStage)
+			require.NotErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.Equal(t, before, e.Stage)
 		})

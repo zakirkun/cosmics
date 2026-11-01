@@ -74,17 +74,17 @@ func (r *LLMCallRepo) Record(ctx context.Context, rec llm.CallRecord, requestJSO
 }
 
 // SumByStage returns token and cost totals for one stage of an engagement.
-func (r *LLMCallRepo) SumByStage(ctx context.Context, engagementID domain.ID, stage domain.StageKind) (TokensIn, TokensOut int, CostMicros int64, err error) {
+func (r *LLMCallRepo) SumByStage(ctx context.Context, engagementID domain.ID, stage domain.StageKind) (tokensIn, tokensOut int, costMicros int64, err error) {
 	const query = `
 		SELECT COALESCE(SUM(tokens_in),0), COALESCE(SUM(tokens_out),0), COALESCE(SUM(cost_usd_micros),0)
 		FROM llm_calls
 		WHERE engagement_id = ? AND stage = ?`
 
 	row := r.db.Reader().QueryRowContext(ctx, query, engagementID.String(), string(stage))
-	if scanErr := row.Scan(&TokensIn, &TokensOut, &CostMicros); scanErr != nil {
+	if scanErr := row.Scan(&tokensIn, &tokensOut, &costMicros); scanErr != nil {
 		return 0, 0, 0, fmt.Errorf("sum llm calls for stage %s: %w", stage, scanErr)
 	}
-	return TokensIn, TokensOut, CostMicros, nil
+	return tokensIn, tokensOut, costMicros, nil
 }
 
 // CountByEngagement returns how many calls were recorded for an engagement.
@@ -113,7 +113,7 @@ func validateCallRecord(rec llm.CallRecord) error {
 	if !rec.Provider.Valid() {
 		return fmt.Errorf("%w: provider %q", ErrInvalidCallRecord, rec.Provider)
 	}
-	if !llm.Purpose(rec.Purpose).Valid() {
+	if !rec.Purpose.Valid() {
 		return fmt.Errorf("%w: purpose %q", ErrInvalidCallRecord, rec.Purpose)
 	}
 	switch rec.Status {

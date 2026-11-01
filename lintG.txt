@@ -1,0 +1,9 @@
+internal\skills\skill_test.go:133:4: require-error: for error assertions use require (testifylint)
+			assert.ErrorIs(t, err, skills.ErrInvalidSkill)
+			^
+internal\store\event_repo_test.go:106:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, domain.ErrEmptyID)
+	^
+internal\store\migrate_test.go:126:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, store.ErrChecksumMismatch)
+	^

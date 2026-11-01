@@ -16,13 +16,10 @@ import (
 )
 
 // newTestClient builds a client against srv with retries disabled.
-func newTestClient(t *testing.T, srv *httptest.Server, opts ...func(*Options)) *Client {
+func newTestClient(t *testing.T, srv *httptest.Server) *Client {
 	t.Helper()
 
 	options := Options{BaseURL: srv.URL, Timeout: 5 * time.Second}
-	for _, apply := range opts {
-		apply(&options)
-	}
 
 	client, err := New(options)
 	require.NoError(t, err)
@@ -51,7 +48,7 @@ func captureBody(t *testing.T, r *http.Request) map[string]any {
 
 func Test_Complete_merges_thinking_text_and_tool_blocks_when_all_three_are_present(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"id":"msg_1","type":"message","role":"assistant",
 			"model":"cutad/deepseek-v4.1-flash",
@@ -137,7 +134,7 @@ func Test_Complete_sends_the_system_prompt_at_the_top_level_when_system_is_set(t
 
 func Test_Complete_maps_stop_reason_tool_use_to_FinishTools(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"model":"m",
 			"content":[{"type":"tool_use","id":"toolu_9","name":"run_httpx","input":{}}],
@@ -161,7 +158,7 @@ func Test_Complete_maps_stop_reason_tool_use_to_FinishTools(t *testing.T) {
 
 func Test_Complete_maps_end_turn_to_FinishStop(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{"model":"m","content":[{"type":"text","text":"done"}],"stop_reason":"end_turn","usage":{}}`)
 	}))
 	defer srv.Close()
@@ -251,7 +248,7 @@ func Test_Complete_passes_the_message_count_without_split_system_when_only_messa
 
 func Test_Complete_returns_an_error_when_the_request_lacks_a_body(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(w, `{"type":"error","error":{"type":"invalid_request_error","message":"messages: at least one message is required"}}`)
 	}))
@@ -303,7 +300,7 @@ func Test_New_applies_the_documented_version_when_omitted(t *testing.T) {
 
 func Test_Complete_records_cached_input_tokens_when_they_are_reported(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"model":"m","content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",
 			"usage":{"input_tokens":100,"output_tokens":20,"cache_read_input_tokens":64}
@@ -325,7 +322,7 @@ func Test_Complete_records_cached_input_tokens_when_they_are_reported(t *testing
 
 func Test_Complete_reports_the_served_model_when_the_provider_substitutes_one(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{"model":"served-by-gateway","content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn","usage":{}}`)
 	}))
 	defer srv.Close()

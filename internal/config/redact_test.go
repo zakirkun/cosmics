@@ -11,7 +11,7 @@ import (
 
 func Test_Redact_replaces_a_configured_secret_when_it_appears_in_text(t *testing.T) {
 	// Given
-	const secret = "sk-test-very-secret-value"
+	const secret = "sk-test-very-secret-value" // #nosec G101 -- a fixture, not a real credential
 	t.Setenv("NINEROUTER_KEY", secret)
 	cfg := config.Default()
 
@@ -100,7 +100,7 @@ func indexOf(haystack, needle string) int {
 
 func Test_RedactMap_returns_a_new_map_and_does_not_mutate_the_input(t *testing.T) {
 	// Given
-	const secret = "sk-map-secret"
+	const secret = "sk-map-secret" // #nosec G101 -- a fixture, not a real credential
 	t.Setenv("NINEROUTER_KEY", secret)
 	cfg := config.Default()
 

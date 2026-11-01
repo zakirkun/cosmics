@@ -44,7 +44,7 @@ func escapesRoot(root, path string) (bool, error) {
 
 	rel, err := filepath.Rel(resolvedRoot, resolvedPath)
 	if err != nil {
-		return true, nil
+		return false, fmt.Errorf("resolve relative path: %w", err)
 	}
 	return rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)), nil
 }

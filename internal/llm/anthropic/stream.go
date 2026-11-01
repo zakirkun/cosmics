@@ -99,7 +99,8 @@ func (p *eventParser) feed(line string) ([]llm.Chunk, error) {
 		return nil, fmt.Errorf("stream reported an error without detail: %w", llm.ErrRetryable)
 
 	case "message_start":
-		return nil, p.onMessageStart(event)
+		p.onMessageStart(event)
+		return nil, nil
 
 	case "content_block_start":
 		return p.onBlockStart(event), nil

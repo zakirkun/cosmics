@@ -97,7 +97,7 @@ func (s *stubState) SetFact(_ context.Context, subject, predicate, value string)
 	return nil
 }
 
-func (s *stubState) AddFinding(_ context.Context, title, severity string) (domain.ID, error) {
+func (s *stubState) AddFinding(_ context.Context, _, _ string) (domain.ID, error) {
 	s.findings++
 	return domain.NewULIDGenerator().New(), nil
 }
@@ -107,7 +107,7 @@ func (s *stubState) LoadSkill(_ context.Context, name string) (string, error) {
 	return "skill body for " + name, nil
 }
 
-func (s *stubState) AskOperator(_ context.Context, question string) (string, error) {
+func (s *stubState) AskOperator(_ context.Context, _ string) (string, error) {
 	return s.answers, nil
 }
 

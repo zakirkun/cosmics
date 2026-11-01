@@ -1,0 +1,9 @@
+internal\tools\argv_test.go:128:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, ErrInvalidTool)
+	^
+internal\store\engagement_repo_test.go:261:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, domain.ErrUnauthorized)
+	^
+internal\store\audit_repo_test.go:177:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, store.ErrAuditChainBroken)
+	^

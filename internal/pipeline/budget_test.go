@@ -3,7 +3,6 @@ package pipeline_test
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -92,7 +91,7 @@ func Test_ExitResult_reason_survives_when_unmet(t *testing.T) {
 
 	// Then
 	assert.False(t, result.Met)
-	assert.True(t, strings.Contains(text, "asset inventory"))
+	assert.Contains(t, text, "asset inventory")
 }
 
 func Test_Run_finishes_within_a_wall_clock_budget_when_stages_are_trivial(t *testing.T) {

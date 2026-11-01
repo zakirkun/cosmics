@@ -2,13 +2,9 @@ package tools
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"sort"
 
 	"gopkg.in/yaml.v3"
-
-	"github.com/cosmics/cosmics/internal/domain"
 )
 
 // yamlTool mirrors Tool for YAML decoding.
@@ -74,36 +70,4 @@ func parseTool(raw []byte) (Tool, error) {
 		Notes:            decoded.Notes,
 		Enabled:          enabled,
 	}, nil
-}
-
-// extractSchema is unused now that parseTool handles re-encoding; it remains as
-// the documented fallback path for a definition whose schema failed to decode.
-func extractSchema(raw []byte) (json.RawMessage, error) {
-	var decoded yamlTool
-	if err := yaml.Unmarshal(raw, &decoded); err != nil {
-		return nil, err
-	}
-	encoded, err := json.Marshal(decoded.ArgSchema)
-	if err != nil {
-		return nil, err
-	}
-	return encoded, nil
-}
-
-// sortByID orders tools deterministically.
-func sortByID(tools []Tool) {
-	sort.Slice(tools, func(i, j int) bool { return tools[i].ID < tools[j].ID })
-}
-
-// ErrEmptyRegistry is returned when no tool definition could be loaded.
-var ErrEmptyRegistry = errors.New("tools: registry is empty")
-
-// defaultStageCategories is the stage allow-list from CORE.md section 5.2.
-var defaultStageCategories = map[domain.StageKind][]Category{
-	domain.StageRecon:     {CategoryRecon, CategoryNetwork, CategoryWeb},
-	domain.StageOSINT:     {CategoryOSINT},
-	domain.StageAnalysis:  nil,
-	domain.StageMapper:    nil,
-	domain.StageExploit:   {CategoryExploit, CategoryWeb},
-	domain.StageReporting: nil,
 }

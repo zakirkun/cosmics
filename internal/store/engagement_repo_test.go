@@ -46,7 +46,7 @@ func Test_EngagementCreate_round_trips_every_persisted_field(t *testing.T) {
 	assert.True(t, got.StartedAt.IsZero(), "a draft has not started")
 	assert.True(t, got.FinishedAt.IsZero(), "a draft has not finished")
 
-	assert.Equal(t, `{"tool_timeout_s":600,"models":["a","b"]}`, got.ConfigJSON)
+	assert.JSONEq(t, `{"tool_timeout_s":600,"models":["a","b"]}`, got.ConfigJSON)
 	assert.Empty(t, got.Err)
 }
 
@@ -258,7 +258,7 @@ func Test_EngagementCreate_rejects_an_engagement_without_authorization(t *testin
 
 	// Then: the store refuses before SQL and writes nothing.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, domain.ErrUnauthorized)
+	require.ErrorIs(t, err, domain.ErrUnauthorized)
 	assertCount(t, db, `SELECT COUNT(*) FROM audit_trail`, 0)
 }
 

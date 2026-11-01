@@ -131,17 +131,19 @@ func stageIndex(eng *domain.Engagement) (int, bool) {
 		return len(domain.AllStages), true
 	case domain.EngageStageNone:
 		return 0, false
+	case domain.EngageStageRecon, domain.EngageStageOSINT, domain.EngageStageAnalysis,
+		domain.EngageStageMapper, domain.EngageStageExploit, domain.EngageStageReporting:
+		kind, ok := eng.Stage.StageKind()
+		if !ok {
+			return 0, false
+		}
+		position := kind.Position()
+		if position == 0 {
+			return 0, false
+		}
+		return position - 1, true
 	}
-
-	kind, ok := eng.Stage.StageKind()
-	if !ok {
-		return 0, false
-	}
-	position := kind.Position()
-	if position == 0 {
-		return 0, false
-	}
-	return position - 1, true
+	return 0, false
 }
 
 // renderStageSidebar renders the six-stage list for an engagement, truncated

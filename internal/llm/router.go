@@ -220,7 +220,7 @@ func (r *Router) now() Timestamp {
 func (r *Router) record(
 	ctx context.Context,
 	target RouteTarget,
-	req Request,
+	_ Request,
 	resp *Response,
 	callErr error,
 	started, finished Timestamp,

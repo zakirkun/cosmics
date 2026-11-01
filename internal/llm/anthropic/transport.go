@@ -67,7 +67,7 @@ func (c *Client) send(ctx context.Context, body []byte, stream bool) (*http.Resp
 		if ctx.Err() != nil {
 			return nil, fmt.Errorf("request failed: %w", ctx.Err())
 		}
-		return nil, fmt.Errorf("%w: %v", llm.ErrRetryable, err)
+		return nil, fmt.Errorf("%w: %w", llm.ErrRetryable, err)
 	}
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {

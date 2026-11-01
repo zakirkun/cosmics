@@ -84,7 +84,7 @@ func Test_ParseSkill_returns_an_error_when_the_front_matter_is_missing(t *testin
 
 	// Then: the typed sentinel is returned.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, skills.ErrInvalidSkill)
+	require.ErrorIs(t, err, skills.ErrInvalidSkill)
 }
 
 func Test_ParseSkill_returns_an_error_when_the_front_matter_is_unterminated(t *testing.T) {
@@ -96,7 +96,7 @@ func Test_ParseSkill_returns_an_error_when_the_front_matter_is_unterminated(t *t
 
 	// Then: the sentinel is returned rather than a panic or a silent empty parse.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, skills.ErrInvalidSkill)
+	require.ErrorIs(t, err, skills.ErrInvalidSkill)
 }
 
 func Test_ParseSkill_returns_an_error_when_a_required_field_is_blank(t *testing.T) {
@@ -130,7 +130,7 @@ func Test_ParseSkill_returns_an_error_when_a_required_field_is_blank(t *testing.
 
 			// Then: it is rejected with the typed sentinel naming the field.
 			require.Error(t, err)
-			assert.ErrorIs(t, err, skills.ErrInvalidSkill)
+			require.ErrorIs(t, err, skills.ErrInvalidSkill)
 			assert.Contains(t, err.Error(), tc.name)
 		})
 	}
@@ -145,7 +145,7 @@ func Test_ParseSkill_returns_an_error_when_the_category_is_not_a_declared_value(
 
 	// Then: it is rejected.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, skills.ErrInvalidSkill)
+	require.ErrorIs(t, err, skills.ErrInvalidSkill)
 }
 
 func Test_ParseSkill_returns_an_error_when_a_stage_affinity_entry_is_unknown(t *testing.T) {
@@ -157,7 +157,7 @@ func Test_ParseSkill_returns_an_error_when_a_stage_affinity_entry_is_unknown(t *
 
 	// Then: it is rejected.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, skills.ErrInvalidSkill)
+	require.ErrorIs(t, err, skills.ErrInvalidSkill)
 }
 
 func Test_ParseSkill_computes_a_stable_sha256_when_the_bytes_are_identical(t *testing.T) {

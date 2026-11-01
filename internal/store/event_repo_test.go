@@ -82,7 +82,7 @@ func Test_EventAppend_round_trips_every_persisted_field(t *testing.T) {
 	assert.Equal(t, domain.EventToolEnd, got[0].Kind)
 	assert.Equal(t, domain.LevelWarn, got[0].Level)
 	assert.Equal(t, event.Message, got[0].Message)
-	assert.Equal(t, `{"ports":[443,8443,22]}`, got[0].DetailJSON)
+	assert.JSONEq(t, `{"ports":[443,8443,22]}`, got[0].DetailJSON)
 	assert.Equal(t, baseTimestamp+500, got[0].CreatedAt)
 }
 
@@ -103,7 +103,7 @@ func Test_EventAppend_rejects_an_event_without_an_id(t *testing.T) {
 
 	// Then: it is rejected and nothing was written.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, domain.ErrEmptyID)
+	require.ErrorIs(t, err, domain.ErrEmptyID)
 
 	list, err := events.ListByEngagement(t.Context(), engagement.ID, 10)
 	require.NoError(t, err)

@@ -1,0 +1,86 @@
+level=error msg="[linters_context] typechecking error: : # github.com/cosmics/cosmics/internal/config_test [github.com/cosmics/cosmics/internal/config.test]\ninternal\\config\\validate_test.go:4:2: \"strings\" imported and not used"
+level=error msg="[linters_context] typechecking error: : # github.com/cosmics/cosmics/internal/pipeline_test [github.com/cosmics/cosmics/internal/pipeline.test]\ninternal\\pipeline\\budget_test.go:6:2: \"strings\" imported and not used"
+internal\agent\batch_test.go:39:2: require-error: for error assertions use require (testifylint)
+	assert.NoError(t, results[0].Err)
+	^
+internal\agent\batch_test.go:40:2: require-error: for error assertions use require (testifylint)
+	assert.Error(t, results[1].Err, "malformed arguments must be rejected")
+	^
+internal\agent\batch_test.go:41:2: require-error: for error assertions use require (testifylint)
+	assert.Error(t, results[2].Err, "a nameless call must be rejected")
+	^
+internal\skills\chunk.go:20:2: Consider pre-allocating `current` (prealloc)
+	var (
+	^
+internal\skills\chunk.go:58:2: Consider pre-allocating `current` (prealloc)
+	var (
+	^
+internal\skills\index.go:18:2: field `chunkedAt` is unused (unused)
+	chunkedAt domain.TimestampMs
+	^
+internal\skills\walk.go:47:3: error is not nil (line 45) but it returns nil (nilerr)
+		return true, nil
+		^
+internal\store\llm_call_repo.go:116:17: unnecessary conversion (unconvert)
+	if !llm.Purpose(rec.Purpose).Valid() {
+	               ^
+internal\llm\anthropic\stream_test.go:105:73: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	                                                                       ^
+internal\llm\anthropic\stream_test.go:268:73: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	                                                                       ^
+internal\llm\anthropic\stream_test.go:306:73: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	                                                                       ^
+internal\llm\openai\client_test.go:345:2: error-is-as: use require.ErrorAs (testifylint)
+	require.True(t, errors.As(err, &argsErr), "expected a typed tool-arguments error, got %v", err)
+	^
+internal\llm\openai\stream_test.go:151:2: error-is-as: use require.ErrorAs (testifylint)
+	require.True(t, errors.As(err, &argsErr))
+	^
+internal\tui\view.go:224:39: redefines-builtin-id: redefinition of the built-in function copy (revive)
+func (m Model) placeholderBody(title, copy string) string {
+                                      ^
+internal\tui\stages.go:129:2: missing cases in switch of type domain.EngageStage: domain.EngageStageRecon, domain.EngageStageOSINT, domain.EngageStageAnalysis, domain.EngageStageMapper, domain.EngageStageExploit, domain.EngageStageReporting (exhaustive)
+	switch eng.Stage {
+	^
+internal\tui\table.go:102:2: missing cases in switch of type domain.EngageStage: domain.EngageStageRecon, domain.EngageStageOSINT, domain.EngageStageAnalysis, domain.EngageStageMapper, domain.EngageStageExploit, domain.EngageStageReporting (exhaustive)
+	switch eng.Stage {
+	^
+internal\agent\execute.go:53:46: unused-parameter: parameter 'calls' seems to be unused, consider removing or renaming it as _ (revive)
+func (l *Loop) runTools(ctx context.Context, calls []llm.ToolCall, actions []Action, results []Result) {
+                                             ^
+internal\agent\execute.go:99:45: unused-parameter: parameter 'calls' seems to be unused, consider removing or renaming it as _ (revive)
+func (l *Loop) runMeta(ctx context.Context, calls []llm.ToolCall, actions []Action, results []Result) {
+                                            ^
+internal\agent\action.go:130:6: func `truncateOutput` is unused (unused)
+func truncateOutput(text string, maxBytes int) string {
+     ^
+internal\memory\facts_test.go:131:2: float-compare: use assert.InEpsilon (or InDelta) (testifylint)
+	assert.Equal(t, 0.9, active.Confidence)
+	^
+internal\memory\retrieve_test.go:112:2: len: use assert.Len (testifylint)
+	assert.Equal(t, 2, len(hits), "two 10-token hits fit; the third would overflow")
+	^
+internal\exec\docker.go:304:10: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+	list := exec.CommandContext(ctx, d.docker, append([]string{"ps", "--quiet", "--all"}, filters...)...)
+	        ^
+internal\exec\docker.go:312:13: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+		remove := exec.CommandContext(ctx, d.docker, "rm", "--force", id)
+		          ^
+internal\exec\fake.go:226:6: type `fakeClock` is unused (unused)
+type fakeClock struct {
+     ^
+internal\exec\fake.go:232:21: func `(*fakeClock).Now` is unused (unused)
+func (c *fakeClock) Now() domain.TimestampMs {
+                    ^
+internal\exec\fake.go:239:21: func `(*fakeClock).Advance` is unused (unused)
+func (c *fakeClock) Advance(by time.Duration) {
+                    ^
+internal\exec\fake.go:246:6: func `describeSpec` is unused (unused)
+func describeSpec(spec RunSpec) string {
+     ^
+internal\exec\docker.go:169:38: Function `Run$3->killByLabel` should pass the context parameter (contextcheck)
+	deadline := time.AfterFunc(timeout, func() {
+	                                    ^

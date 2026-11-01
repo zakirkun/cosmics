@@ -71,7 +71,7 @@ func Test_NewTarget_AcceptsValue_when_KindAndValueAreValid(t *testing.T) {
 			target, err := domain.NewTarget(kind, input)
 
 			// Then
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, kind, target.Kind)
 			assert.Equal(t, tt.want, target.Value)
 			assert.Equal(t, input, target.Raw)

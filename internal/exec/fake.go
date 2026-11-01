@@ -2,11 +2,7 @@ package exec
 
 import (
 	"context"
-	"fmt"
 	"sync"
-	"time"
-
-	"github.com/cosmics/cosmics/internal/domain"
 )
 
 // Fake is an in-memory executor for pipeline tests.
@@ -220,29 +216,4 @@ func (s *StaticExecutor) Runs() int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.runs
-}
-
-// fakeClock returns a fixed instant and advances on demand.
-type fakeClock struct {
-	mu  sync.Mutex
-	now domain.TimestampMs
-}
-
-// Now returns the current fake instant.
-func (c *fakeClock) Now() domain.TimestampMs {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.now
-}
-
-// Advance moves the fake instant forward.
-func (c *fakeClock) Advance(by time.Duration) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.now += domain.TimestampMs(by.Milliseconds())
-}
-
-// describeSpec renders a spec for an assertion message.
-func describeSpec(spec RunSpec) string {
-	return fmt.Sprintf("image=%s argv=%v network=%s", spec.Image, spec.Argv, spec.NetworkMode)
 }

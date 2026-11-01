@@ -221,11 +221,11 @@ func (m Model) documentBody() string {
 }
 
 // placeholderBody renders a title plus explanatory copy for a scaffold screen.
-func (m Model) placeholderBody(title, copy string) string {
+func (m Model) placeholderBody(title, body string) string {
 	return lipgloss.JoinVertical(lipgloss.Left,
 		styleTitle.Render(title),
 		"",
-		styleMuted.Width(m.contentWidth()).Render(copy),
+		styleMuted.Width(m.contentWidth()).Render(body),
 	)
 }
 

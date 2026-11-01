@@ -68,7 +68,7 @@ func Test_Engagement_Fail_ReturnsIllegalMove_when_StatusIsDraftOrPaused(t *testi
 			got, err := before.Fail(t4, errors.New("boom"))
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.False(t, before.Status.Terminal())
 			assert.Empty(t, before.Err, "a rejected failure must not record a cause")
@@ -112,7 +112,7 @@ func Test_Engagement_Pause_ReturnsIllegalMove_when_StatusIsNotRunning(t *testing
 			got, err := before.Pause(t3)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 			assert.NotEqual(t, domain.StatusPaused, before.Status)
 		})
@@ -156,7 +156,7 @@ func Test_Engagement_Resume_ReturnsIllegalMove_when_StatusIsNotPaused(t *testing
 			got, err := before.Resume(t3)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.Equal(t, domain.Engagement{}, got)
 		})
 	}
@@ -201,7 +201,7 @@ func Test_Engagement_Start_BeginsAtFirstModeStage_when_ModeDiffers(t *testing.T)
 
 			e, err := domain.NewEngagement(p)
 			require.NoError(t, err)
-			require.Equal(t, p.Mode.Stages()[0], domain.StageRecon)
+			require.Equal(t, domain.StageRecon, p.Mode.Stages()[0])
 
 			e, err = e.Authorize(t1)
 			require.NoError(t, err)

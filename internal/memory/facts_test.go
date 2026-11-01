@@ -128,7 +128,7 @@ func Test_Set_keeps_the_previous_fact_active_when_confidence_is_lower(t *testing
 	active, err := repo.Active(t.Context(), engagementID, "www.example.com", "web.tech")
 	require.NoError(t, err)
 	assert.Equal(t, strong.ID.String(), active.ID.String())
-	assert.Equal(t, 0.9, active.Confidence)
+	assert.InDelta(t, 0.9, active.Confidence, 1e-9)
 
 	history, err := repo.History(t.Context(), engagementID, "www.example.com", "web.tech")
 	require.NoError(t, err)

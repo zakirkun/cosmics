@@ -123,7 +123,7 @@ func Test_Migrate_aborts_when_a_recorded_checksum_changes(t *testing.T) {
 
 	// Then: it refuses to proceed and says why.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, store.ErrChecksumMismatch)
+	require.ErrorIs(t, err, store.ErrChecksumMismatch)
 	assert.NotErrorIs(t, err, store.ErrMigrationOrder)
 }
 
@@ -142,7 +142,7 @@ func Test_Migrate_rejects_an_applied_version_that_is_not_embedded(t *testing.T) 
 
 	// Then: the history cannot be reconciled with the embedded set.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, store.ErrMigrationOrder)
+	require.ErrorIs(t, err, store.ErrMigrationOrder)
 	assert.NotErrorIs(t, err, store.ErrChecksumMismatch)
 }
 
@@ -152,7 +152,7 @@ func Test_Migrate_creates_append_only_triggers_when_schema_is_applied(t *testing
 	db := openTestDB(t)
 	ctx := t.Context()
 
-	seedAppendOnlyFixture(t, db, ctx)
+	seedAppendOnlyFixture(ctx, t, db)
 
 	rejections := []struct {
 		name  string
@@ -197,7 +197,7 @@ func Test_Migrate_creates_append_only_triggers_when_schema_is_applied(t *testing
 // seedAppendOnlyFixture inserts the rows the trigger assertions mutate. It uses
 // the writer handle directly because the repositories would reject ULIDs like
 // "ENG" and these tests are about triggers, not domain validation.
-func seedAppendOnlyFixture(t *testing.T, db *store.DB, ctx context.Context) {
+func seedAppendOnlyFixture(ctx context.Context, t *testing.T, db *store.DB) {
 	t.Helper()
 
 	now := time.Now().UTC().UnixMilli()

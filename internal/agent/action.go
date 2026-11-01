@@ -123,6 +123,8 @@ type askOperatorArgs struct {
 	Question string `json:"question"`
 }
 
+const maxToolOutputBytes = 32768
+
 // truncateOutput bounds a tool result before it enters the conversation.
 //
 // A result that would flood the context is cut with an explicit marker so the

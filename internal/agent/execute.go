@@ -50,7 +50,7 @@ func (l *Loop) execute(ctx context.Context, calls []llm.ToolCall) []Result {
 }
 
 // runTools executes the tool-call actions concurrently, bounded by the limit.
-func (l *Loop) runTools(ctx context.Context, calls []llm.ToolCall, actions []Action, results []Result) {
+func (l *Loop) runTools(ctx context.Context, _ []llm.ToolCall, actions []Action, results []Result) {
 	var (
 		wg      sync.WaitGroup
 		mu      sync.Mutex
@@ -88,15 +88,23 @@ func (l *Loop) runTools(ctx context.Context, calls []llm.ToolCall, actions []Act
 }
 
 // invokeTool runs one tool through the injected invoker.
+//
+// The output is truncated before it reaches the conversation: an unbounded tool
+// result would consume the whole context window and evict the stage contract.
 func (l *Loop) invokeTool(ctx context.Context, action Action) (string, error) {
 	if l.deps.Tools == nil {
 		return "", fmt.Errorf("tool %s: no invoker configured: %w", action.ToolID, ErrUnknownAction)
 	}
-	return l.deps.Tools.Invoke(ctx, action.ToolID, action.Args, action.Target)
+
+	output, err := l.deps.Tools.Invoke(ctx, action.ToolID, action.Args, action.Target)
+	if err != nil {
+		return "", err
+	}
+	return truncateOutput(output, maxToolOutputBytes), nil
 }
 
 // runMeta applies state-changing actions in the order the model emitted them.
-func (l *Loop) runMeta(ctx context.Context, calls []llm.ToolCall, actions []Action, results []Result) {
+func (l *Loop) runMeta(ctx context.Context, _ []llm.ToolCall, actions []Action, results []Result) {
 	for i := range actions {
 		if results[i].Err != nil || !actions[i].Kind.Meta() {
 			continue

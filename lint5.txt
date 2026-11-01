@@ -1,0 +1,96 @@
+internal\config\validate_test.go:196:2: contains: use assert.Contains (testifylint)
+	assert.True(t, strings.Contains(err.Error(), "default.recon"))
+	^
+internal\config\validate_test.go:197:2: contains: use assert.Contains (testifylint)
+	assert.True(t, strings.Contains(err.Error(), "default.reporting"))
+	^
+internal\config\validate_test.go:139:4: require-error: for error assertions use require (testifylint)
+			assert.ErrorIs(t, err, config.ErrInvalidConfig)
+			^
+internal\config\validate_test.go:158:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, config.ErrInvalidConfig)
+	^
+internal\pipeline\budget_test.go:95:2: contains: use assert.Contains (testifylint)
+	assert.True(t, strings.Contains(text, "asset inventory"))
+	^
+internal\pipeline\runner_test.go:94:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, pipeline.ErrExitCriteriaUnmet)
+	^
+internal\exec\docker.go:140:9: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+	cmd := exec.CommandContext(runCtx, d.docker, args...)
+	       ^
+internal\exec\docker.go:283:10: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+	list := exec.CommandContext(ctx, d.docker, "ps", "--quiet", "--filter", filter)
+	        ^
+internal\exec\docker.go:290:11: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+		kill := exec.CommandContext(ctx, d.docker, "kill", id)
+		        ^
+internal\exec\fake.go:226:6: type `fakeClock` is unused (unused)
+type fakeClock struct {
+     ^
+internal\exec\fake.go:232:21: func `(*fakeClock).Now` is unused (unused)
+func (c *fakeClock) Now() domain.TimestampMs {
+                    ^
+internal\exec\fake.go:239:21: func `(*fakeClock).Advance` is unused (unused)
+func (c *fakeClock) Advance(by time.Duration) {
+                    ^
+internal\exec\fake.go:246:6: func `describeSpec` is unused (unused)
+func describeSpec(spec RunSpec) string {
+     ^
+internal\exec\docker.go:169:38: Function `Run$3->killByLabel` should pass the context parameter (contextcheck)
+	deadline := time.AfterFunc(timeout, func() {
+	                                    ^
+internal\tui\view.go:224:39: redefines-builtin-id: redefinition of the built-in function copy (revive)
+func (m Model) placeholderBody(title, copy string) string {
+                                      ^
+internal\tui\stages.go:129:2: missing cases in switch of type domain.EngageStage: domain.EngageStageRecon, domain.EngageStageOSINT, domain.EngageStageAnalysis, domain.EngageStageMapper, domain.EngageStageExploit, domain.EngageStageReporting (exhaustive)
+	switch eng.Stage {
+	^
+internal\tui\table.go:102:2: missing cases in switch of type domain.EngageStage: domain.EngageStageRecon, domain.EngageStageOSINT, domain.EngageStageAnalysis, domain.EngageStageMapper, domain.EngageStageExploit, domain.EngageStageReporting (exhaustive)
+	switch eng.Stage {
+	^
+internal\skills\chunk.go:20:2: Consider pre-allocating `current` (prealloc)
+	var (
+	^
+internal\skills\chunk.go:58:2: Consider pre-allocating `current` (prealloc)
+	var (
+	^
+internal\agent\execute.go:53:46: unused-parameter: parameter 'calls' seems to be unused, consider removing or renaming it as _ (revive)
+func (l *Loop) runTools(ctx context.Context, calls []llm.ToolCall, actions []Action, results []Result) {
+                                             ^
+internal\agent\execute.go:99:45: unused-parameter: parameter 'calls' seems to be unused, consider removing or renaming it as _ (revive)
+func (l *Loop) runMeta(ctx context.Context, calls []llm.ToolCall, actions []Action, results []Result) {
+                                            ^
+internal\llm\anthropic\stream_test.go:105:73: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	                                                                       ^
+internal\llm\anthropic\stream_test.go:268:73: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	                                                                       ^
+internal\llm\anthropic\stream_test.go:306:73: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	                                                                       ^
+internal\store\llm_call_repo.go:116:17: unnecessary conversion (unconvert)
+	if !llm.Purpose(rec.Purpose).Valid() {
+	               ^
+internal\agent\action.go:130:6: func `truncateOutput` is unused (unused)
+func truncateOutput(text string, maxBytes int) string {
+     ^
+internal\skills\index.go:18:2: field `chunkedAt` is unused (unused)
+	chunkedAt domain.TimestampMs
+	^
+internal\skills\walk.go:47:3: error is not nil (line 45) but it returns nil (nilerr)
+		return true, nil
+		^
+internal\llm\openai\client_test.go:345:2: error-is-as: use require.ErrorAs (testifylint)
+	require.True(t, errors.As(err, &argsErr), "expected a typed tool-arguments error, got %v", err)
+	^
+internal\llm\openai\stream_test.go:151:2: error-is-as: use require.ErrorAs (testifylint)
+	require.True(t, errors.As(err, &argsErr))
+	^
+internal\memory\facts_test.go:131:2: float-compare: use assert.InEpsilon (or InDelta) (testifylint)
+	assert.Equal(t, 0.9, active.Confidence)
+	^
+internal\memory\retrieve_test.go:112:2: len: use assert.Len (testifylint)
+	assert.Equal(t, 2, len(hits), "two 10-token hits fit; the third would overflow")
+	^

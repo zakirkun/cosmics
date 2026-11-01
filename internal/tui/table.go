@@ -95,25 +95,30 @@ func renderCompactList(engagements []domain.Engagement, cursor, width int) strin
 	return strings.Join(rows, "\n")
 }
 
+const emDash = "\u2014"
+
 // stageLabel is the short pipeline pointer shown in the table.
 func stageLabel(eng domain.Engagement) string {
 	switch eng.Stage {
 	case domain.EngageStageNone:
-		return "—"
+		return emDash
 	case domain.EngageStageDone:
 		return "done"
+	case domain.EngageStageRecon, domain.EngageStageOSINT, domain.EngageStageAnalysis,
+		domain.EngageStageMapper, domain.EngageStageExploit, domain.EngageStageReporting:
+		kind, ok := eng.Stage.StageKind()
+		if !ok {
+			return emDash
+		}
+		return string(kind)
 	}
-	kind, ok := eng.Stage.StageKind()
-	if !ok {
-		return "—"
-	}
-	return string(kind)
+	return emDash
 }
 
 // updatedLabel renders UpdatedAt as a UTC wall clock, or a dash when unset.
 func updatedLabel(eng domain.Engagement) string {
 	if eng.UpdatedAt.IsZero() {
-		return "—"
+		return emDash
 	}
 	return eng.UpdatedAt.Time().Format("2006-01-02 15:04")
 }

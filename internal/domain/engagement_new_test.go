@@ -166,7 +166,7 @@ func Test_NewEngagement_RejectsInput_when_ContractIsViolated(t *testing.T) {
 			e, err := domain.NewEngagement(p)
 
 			// Then
-			assert.ErrorIs(t, err, tt.want)
+			require.ErrorIs(t, err, tt.want)
 			assert.Equal(t, domain.Engagement{}, e)
 		})
 	}

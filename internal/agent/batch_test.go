@@ -36,9 +36,9 @@ func Test_ExecuteBatch_returns_one_result_per_call_when_some_are_invalid(t *test
 
 	// Then
 	require.Len(t, results, 3)
-	assert.NoError(t, results[0].Err)
-	assert.Error(t, results[1].Err, "malformed arguments must be rejected")
-	assert.Error(t, results[2].Err, "a nameless call must be rejected")
+	require.NoError(t, results[0].Err)
+	require.Error(t, results[1].Err, "malformed arguments must be rejected")
+	require.Error(t, results[2].Err, "a nameless call must be rejected")
 	assert.Equal(t, 1, tools.seenCount(), "only the valid call reaches the invoker")
 }
 

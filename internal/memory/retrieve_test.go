@@ -109,7 +109,7 @@ func Test_Search_respects_the_token_budget_when_hits_exceed_it(t *testing.T) {
 		total += hit.Tokens
 	}
 	assert.LessOrEqual(t, total, 25, "the returned set must fit the token budget")
-	assert.Equal(t, 2, len(hits), "two 10-token hits fit; the third would overflow")
+	assert.Len(t, hits, 2, "two 10-token hits fit; the third would overflow")
 }
 
 func Test_Search_respects_TopK_when_more_hits_are_available(t *testing.T) {
@@ -233,7 +233,7 @@ func Test_Search_returns_ErrEmbeddingUnavailable_when_vector_mode_has_no_embedde
 
 	// Then: it fails loudly instead of silently degrading to keyword.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, memory.ErrEmbeddingUnavailable)
+	require.ErrorIs(t, err, memory.ErrEmbeddingUnavailable)
 	assert.Nil(t, hits)
 }
 
@@ -252,7 +252,7 @@ func Test_Search_returns_ErrEmbeddingUnavailable_when_hybrid_mode_has_no_embedde
 
 	// Then: the same typed sentinel is returned.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, memory.ErrEmbeddingUnavailable)
+	require.ErrorIs(t, err, memory.ErrEmbeddingUnavailable)
 }
 
 func Test_Search_rejects_an_unknown_mode_when_validating(t *testing.T) {

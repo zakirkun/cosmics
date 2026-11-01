@@ -17,11 +17,10 @@ func (s Skill) Chunks(maxTokens int) []string {
 		maxTokens = DefaultChunkTokens
 	}
 
-	var (
-		chunks  []string
-		current []string
-		used    int
-	)
+	chunks := make([]string, 0, 4)
+	current := make([]string, 0, 4)
+	used := 0
+
 	flush := func() {
 		if len(current) == 0 {
 			return
@@ -55,10 +54,9 @@ func (s Skill) Chunks(maxTokens int) []string {
 func splitSections(body string) []string {
 	lines := strings.Split(strings.ReplaceAll(body, "\r\n", "\n"), "\n")
 
-	var (
-		sections []string
-		current  []string
-	)
+	sections := make([]string, 0, 8)
+	current := make([]string, 0, 8)
+
 	flush := func() {
 		text := strings.TrimSpace(strings.Join(current, "\n"))
 		if text != "" {

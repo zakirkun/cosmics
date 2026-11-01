@@ -1,0 +1,9 @@
+internal\store\engagement_status_test.go:111:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, store.ErrNotFound)
+	^
+internal\domain\status_test.go:133:4: require-error: for error assertions use require (testifylint)
+			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			^
+internal\domain\id_test.go:107:4: require-error: for error assertions use require (testifylint)
+			assert.ErrorIs(t, err, tt.want)
+			^

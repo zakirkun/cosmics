@@ -104,7 +104,7 @@ func Test_NewID_Rejects_when_InputIsMalformed(t *testing.T) {
 			id, err := domain.NewID(input)
 
 			// Then
-			assert.ErrorIs(t, err, tt.want)
+			require.ErrorIs(t, err, tt.want)
 			assert.Empty(t, id.String())
 			assert.True(t, id.IsZero())
 		})

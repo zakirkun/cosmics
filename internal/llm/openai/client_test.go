@@ -3,7 +3,6 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -52,7 +51,7 @@ func simpleRequest() llm.Request {
 
 func Test_Complete_returns_content_and_served_model_when_the_gateway_resolves_a_combo(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"model":"cutad/deepseek-v4.1-flash",
 			"choices":[{"index":0,"message":{"role":"assistant","content":"COSMICS_OK"},"finish_reason":"stop"}],
@@ -78,7 +77,7 @@ func Test_Complete_returns_content_and_served_model_when_the_gateway_resolves_a_
 
 func Test_Complete_maps_usage_details_when_present(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"model":"m",
 			"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],
@@ -104,7 +103,7 @@ func Test_Complete_maps_usage_details_when_present(t *testing.T) {
 
 func Test_Complete_parses_tool_call_arguments_into_json_when_the_arguments_are_a_string(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"model":"m",
 			"choices":[{"index":0,"message":{"role":"assistant","tool_calls":[
@@ -135,7 +134,7 @@ func Test_Complete_parses_tool_call_arguments_into_json_when_the_arguments_are_a
 func Test_Complete_returns_ErrNotRetryable_when_the_provider_rejects_the_request(t *testing.T) {
 	// Given
 	var hits atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		hits.Add(1)
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(w, `{"error":{"message":"Invalid JSON body","type":"invalid_request_error","code":"bad_request"}}`)
@@ -149,14 +148,14 @@ func Test_Complete_returns_ErrNotRetryable_when_the_provider_rejects_the_request
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, llm.ErrNotRetryable)
+	require.ErrorIs(t, err, llm.ErrNotRetryable)
 	assert.Equal(t, int32(1), hits.Load(), "a permanent failure must not be retried")
 }
 
 func Test_Complete_retries_when_the_provider_is_temporarily_unavailable(t *testing.T) {
 	// Given
 	var hits atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		if hits.Add(1) == 1 {
 			w.WriteHeader(http.StatusTooManyRequests)
 			_, _ = io.WriteString(w, `{"error":{"message":"rate limited","code":"rate_limited"}}`)
@@ -182,7 +181,7 @@ func Test_Complete_retries_when_the_provider_is_temporarily_unavailable(t *testi
 func Test_Complete_honours_RetryAfter_when_the_provider_supplies_it(t *testing.T) {
 	// Given
 	var hits atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		if hits.Add(1) == 1 {
 			w.Header().Set("Retry-After", "7")
 			w.WriteHeader(http.StatusTooManyRequests)
@@ -305,7 +304,7 @@ func Test_New_rejects_a_negative_retry_count(t *testing.T) {
 
 func Test_Complete_returns_an_error_when_the_response_has_no_choices(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{"model":"m","choices":[],"usage":{}}`)
 	}))
 	defer srv.Close()
@@ -322,7 +321,7 @@ func Test_Complete_returns_an_error_when_the_response_has_no_choices(t *testing.
 
 func Test_Complete_propagates_a_tool_arguments_error_when_the_string_is_not_json(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{
 			"model":"m",
 			"choices":[{"index":0,"message":{"role":"assistant","tool_calls":[
@@ -342,6 +341,6 @@ func Test_Complete_propagates_a_tool_arguments_error_when_the_string_is_not_json
 	require.Error(t, err)
 
 	var argsErr *ToolArgumentsError
-	require.True(t, errors.As(err, &argsErr), "expected a typed tool-arguments error, got %v", err)
+	require.ErrorAs(t, err, &argsErr, "expected a typed tool-arguments error")
 	assert.Equal(t, "call_bad", argsErr.CallID)
 }

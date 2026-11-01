@@ -2,7 +2,6 @@ package tools
 
 import (
 	"encoding/json"
-	"errors"
 	"strings"
 	"testing"
 
@@ -126,7 +125,7 @@ func Test_Tool_Validate_rejects_every_missing_field_when_the_tool_is_empty(t *te
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidTool)
+	require.ErrorIs(t, err, ErrInvalidTool)
 
 	message := err.Error()
 	for _, field := range []string{"display_name", "image", "binary", "arg_schema", "command_template"} {
@@ -201,6 +200,6 @@ func Test_authorizeVarErrors_are_wrapped_when_returned(t *testing.T) {
 
 	// Then
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrStageForbidden))
+	require.ErrorIs(t, err, ErrStageForbidden)
 	assert.Contains(t, strings.ToLower(err.Error()), "reporting")
 }

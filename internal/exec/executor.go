@@ -11,6 +11,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cosmics/cosmics/internal/domain"
@@ -64,6 +65,12 @@ type RunSpec struct {
 func (s RunSpec) Validate() error {
 	if s.Image == "" {
 		return fmt.Errorf("%w: image is empty", ErrRunFailed)
+	}
+	if strings.HasPrefix(s.Image, "-") {
+		return fmt.Errorf("%w: image %q must not start with '-', which docker would parse as a flag", ErrRunFailed, s.Image)
+	}
+	if strings.ContainsAny(s.Image, " \t\n\r") {
+		return fmt.Errorf("%w: image %q must not contain whitespace", ErrRunFailed, s.Image)
 	}
 	if len(s.Argv) == 0 {
 		return fmt.Errorf("%w: argv is empty", ErrRunFailed)

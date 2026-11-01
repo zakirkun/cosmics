@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -136,7 +135,7 @@ func Test_Validate_rejects_each_invalid_field_when_present(t *testing.T) {
 
 			// Then
 			require.Error(t, err)
-			assert.ErrorIs(t, err, config.ErrInvalidConfig)
+			require.ErrorIs(t, err, config.ErrInvalidConfig)
 			assert.Contains(t, err.Error(), tt.contains)
 		})
 	}
@@ -155,7 +154,7 @@ func Test_Validate_joins_all_problems_when_several_rules_break(t *testing.T) {
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, config.ErrInvalidConfig)
+	require.ErrorIs(t, err, config.ErrInvalidConfig)
 
 	message := err.Error()
 	assert.Contains(t, message, "log_level")
@@ -193,6 +192,6 @@ func Test_Validate_returns_one_error_per_missing_stage_when_a_profile_is_empty(t
 
 	// Then
 	require.Error(t, err)
-	assert.True(t, strings.Contains(err.Error(), "default.recon"))
-	assert.True(t, strings.Contains(err.Error(), "default.reporting"))
+	assert.Contains(t, err.Error(), "default.recon")
+	assert.Contains(t, err.Error(), "default.reporting")
 }

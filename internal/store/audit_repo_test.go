@@ -136,7 +136,7 @@ func Test_AuditVerify_detects_tampering_when_a_row_is_rewritten(t *testing.T) {
 	verified, err := repo.Verify(t.Context())
 
 	require.Error(t, err)
-	assert.ErrorIs(t, err, store.ErrAuditChainBroken)
+	require.ErrorIs(t, err, store.ErrAuditChainBroken)
 	assert.Equal(t, 1, verified, "the rows before the tampered one still verify")
 
 	var verifyErr *store.AuditVerifyError
@@ -174,7 +174,7 @@ func Test_AuditVerify_detects_a_broken_link_when_a_row_is_deleted(t *testing.T) 
 	verified, err := repo.Verify(t.Context())
 
 	require.Error(t, err)
-	assert.ErrorIs(t, err, store.ErrAuditChainBroken)
+	require.ErrorIs(t, err, store.ErrAuditChainBroken)
 	assert.Equal(t, 1, verified)
 
 	var verifyErr *store.AuditVerifyError
@@ -195,7 +195,7 @@ func Test_AuditAppend_rejects_an_invalid_actor_when_the_domain_does_not_know_it(
 
 	// Then: it is rejected before reaching SQL and nothing was written.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, domain.ErrUnknownValue)
+	require.ErrorIs(t, err, domain.ErrUnknownValue)
 
 	entries := readChain(t, db)
 	assert.Empty(t, entries)

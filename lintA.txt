@@ -1,0 +1,30 @@
+internal\llm\router_test.go:142:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, llm.ErrNotRetryable)
+	^
+internal\llm\router_test.go:171:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, llm.ErrChainExhausted)
+	^
+internal\llm\router_test.go:232:2: require-error: for error assertions use require (testifylint)
+	assert.ErrorIs(t, err, context.Canceled)
+	^
+internal\exec\docker.go:312:13: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+		remove := exec.CommandContext(ctx, d.docker, "rm", "--force", id)
+		          ^
+internal\exec\fake.go:226:6: type `fakeClock` is unused (unused)
+type fakeClock struct {
+     ^
+internal\exec\fake.go:232:21: func `(*fakeClock).Now` is unused (unused)
+func (c *fakeClock) Now() domain.TimestampMs {
+                    ^
+internal\exec\fake.go:239:21: func `(*fakeClock).Advance` is unused (unused)
+func (c *fakeClock) Advance(by time.Duration) {
+                    ^
+internal\exec\fake.go:246:6: func `describeSpec` is unused (unused)
+func describeSpec(spec RunSpec) string {
+     ^
+internal\exec\docker.go:169:38: Function `Run$3->killByLabel` should pass the context parameter (contextcheck)
+	deadline := time.AfterFunc(timeout, func() {
+	                                    ^
+internal\memory\retrieve_test.go:112:2: len: use assert.Len (testifylint)
+	assert.Equal(t, 2, len(hits), "two 10-token hits fit; the third would overflow")
+	^

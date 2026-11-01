@@ -29,7 +29,7 @@ func Test_NewTarget_RejectsValue_when_LengthExceedsLimit(t *testing.T) {
 			target, err := domain.NewTarget(domain.TargetDomain, input)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrBadTarget)
+			require.ErrorIs(t, err, domain.ErrBadTarget)
 			assert.Equal(t, domain.Target{}, target)
 		})
 	}
@@ -55,7 +55,7 @@ func Test_NewTarget_RejectsInput_when_KindIsUndeclared(t *testing.T) {
 			target, err := domain.NewTarget(kind, "example.com")
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrBadTarget)
+			require.ErrorIs(t, err, domain.ErrBadTarget)
 			assert.Equal(t, domain.Target{}, target)
 		})
 	}
@@ -83,7 +83,7 @@ func Test_NewTarget_RejectsValue_when_ValueIsBlank(t *testing.T) {
 			target, err := domain.NewTarget(domain.TargetDomain, input)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrBadTarget)
+			require.ErrorIs(t, err, domain.ErrBadTarget)
 			assert.Equal(t, domain.Target{}, target)
 		})
 	}
@@ -113,7 +113,7 @@ func Test_NewTarget_RejectsValue_when_ValueContainsControlCharacter(t *testing.T
 			target, err := domain.NewTarget(domain.TargetDomain, input)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrBadTarget)
+			require.ErrorIs(t, err, domain.ErrBadTarget)
 			assert.Equal(t, domain.Target{}, target)
 		})
 	}
@@ -147,7 +147,7 @@ func Test_NewTarget_RejectsValue_when_ValueContainsShellMetacharacter(t *testing
 			target, err := domain.NewTarget(domain.TargetDomain, input)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrBadTarget, "metacharacter %q must be rejected", tt.char)
+			require.ErrorIs(t, err, domain.ErrBadTarget, "metacharacter %q must be rejected", tt.char)
 			assert.Equal(t, domain.Target{}, target)
 		})
 	}
@@ -184,7 +184,7 @@ func Test_NewTarget_ChecksKindBeforeValue_when_BothAreInvalid(t *testing.T) {
 			target, err := domain.NewTarget(kind, input)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrBadTarget)
+			require.ErrorIs(t, err, domain.ErrBadTarget)
 			assert.Equal(t, domain.Target{}, target)
 		})
 	}
@@ -220,7 +220,7 @@ func Test_NewTarget_AcceptsValue_when_MetacharacterLookalikesAreHarmless(t *test
 			target, err := domain.NewTarget(domain.TargetURL, input)
 
 			// Then
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, input, target.Value)
 			assert.Equal(t, input, target.Raw)
 		})
@@ -243,7 +243,7 @@ func Test_NewTarget_PreservesKind_when_ValueIsAccepted(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, kind, target.Kind)
 			require.True(t, target.Kind.Valid())
-			require.True(t, target.Value == target.Raw)
+			require.Equal(t, target.Raw, target.Value)
 		})
 	}
 }

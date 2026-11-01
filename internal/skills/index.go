@@ -12,10 +12,9 @@ import (
 
 // storedState is the index metadata one path already has.
 type storedState struct {
-	id        string
-	sha256    string
-	enabled   bool
-	chunkedAt domain.TimestampMs
+	id      string
+	sha256  string
+	enabled bool
 }
 
 // storedSkills reads every indexed path with the fields Sync compares.

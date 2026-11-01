@@ -84,7 +84,7 @@ func Test_Status_Transition_ReturnsNil_when_MoveIsAllowed(t *testing.T) {
 				err := from.Transition(to)
 
 				// Then
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.True(t, from.CanTransitionTo(to))
 			})
 		}
@@ -130,7 +130,7 @@ func Test_Status_Transition_ReturnsIllegalMove_when_MoveIsNotDeclared(t *testing
 			err := from.Transition(to)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrIllegalMove)
+			require.ErrorIs(t, err, domain.ErrIllegalMove)
 			assert.False(t, from.CanTransitionTo(to))
 		})
 	}
@@ -148,12 +148,12 @@ func Test_Status_Transition_MatchesSpecifiedMatrix_when_EveryPairIsTried(t *test
 
 				// Then
 				if wantAllowed {
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.True(t, from.CanTransitionTo(to))
 					return
 				}
 
-				assert.ErrorIs(t, err, domain.ErrIllegalMove)
+				require.ErrorIs(t, err, domain.ErrIllegalMove)
 				assert.False(t, from.CanTransitionTo(to))
 			})
 		}
@@ -299,7 +299,7 @@ func Test_ValidateName_AcceptsName_when_ValueIsWithinBounds(t *testing.T) {
 			err := domain.ValidateName(input)
 
 			// Then
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }

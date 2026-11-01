@@ -125,7 +125,7 @@ func Test_Authorize_rejects_a_tool_from_the_wrong_stage_when_called(t *testing.T
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrStageForbidden)
+	require.ErrorIs(t, err, ErrStageForbidden)
 }
 
 func Test_Authorize_rejects_an_unknown_tool_when_called(t *testing.T) {
@@ -164,7 +164,7 @@ func Test_BuildInvocation_rejects_a_missing_required_field_when_omitted(t *testi
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
+	require.ErrorIs(t, err, ErrInvalidArgs)
 	assert.Contains(t, err.Error(), "target")
 }
 
@@ -178,7 +178,7 @@ func Test_BuildInvocation_rejects_an_unknown_field_when_additional_properties_is
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
+	require.ErrorIs(t, err, ErrInvalidArgs)
 	assert.Contains(t, err.Error(), "--script")
 }
 
@@ -192,7 +192,7 @@ func Test_BuildInvocation_rejects_a_wrong_type_when_a_string_is_given_for_an_int
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
+	require.ErrorIs(t, err, ErrInvalidArgs)
 }
 
 func Test_BuildInvocation_rejects_an_out_of_range_value_when_minimum_is_violated(t *testing.T) {
@@ -205,7 +205,7 @@ func Test_BuildInvocation_rejects_an_out_of_range_value_when_minimum_is_violated
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
+	require.ErrorIs(t, err, ErrInvalidArgs)
 }
 
 func Test_BuildInvocation_rejects_a_pattern_miss_when_the_target_contains_metacharacters(t *testing.T) {
@@ -232,7 +232,7 @@ func Test_BuildInvocation_rejects_a_pattern_miss_when_the_target_contains_metach
 
 			// Then
 			require.Error(t, err)
-			assert.ErrorIs(t, err, ErrInvalidArgs)
+			require.ErrorIs(t, err, ErrInvalidArgs)
 		})
 	}
 }
@@ -247,7 +247,7 @@ func Test_BuildInvocation_rejects_an_enum_miss_when_the_value_is_outside_the_set
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
+	require.ErrorIs(t, err, ErrInvalidArgs)
 	assert.Contains(t, err.Error(), "severity")
 }
 
@@ -261,5 +261,5 @@ func Test_BuildInvocation_rejects_arguments_that_are_not_an_object_when_given_an
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, ErrInvalidArgs)
+	require.ErrorIs(t, err, ErrInvalidArgs)
 }

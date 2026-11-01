@@ -9,16 +9,17 @@ import (
 	"github.com/cosmics/cosmics/internal/llm"
 )
 
+const blockTypeToolUse = "tool_use"
+
 // onMessageStart records the model and the initial usage counters.
-func (p *eventParser) onMessageStart(event wireEvent) error {
+func (p *eventParser) onMessageStart(event wireEvent) {
 	if event.Message == nil {
-		return nil
+		return
 	}
 	if event.Message.Model != "" {
 		p.servedModel = event.Message.Model
 	}
 	p.mergeUsage(event.Message.Usage)
-	return nil
 }
 
 // onBlockStart registers a block and emits any content it opens with.
@@ -60,7 +61,7 @@ func (p *eventParser) onBlockStart(event wireEvent) []llm.Chunk {
 			p.reasoning.WriteString(event.Block.Thinking)
 			chunks = append(chunks, llm.Chunk{Kind: llm.ChunkReasoning, Text: event.Block.Thinking})
 		}
-	case "tool_use":
+	case blockTypeToolUse:
 		if len(event.Block.Input) > 0 && string(event.Block.Input) != "{}" {
 			block.startInput = string(event.Block.Input)
 		}
@@ -177,10 +178,10 @@ func (p *eventParser) toolCalls() ([]llm.ToolCall, error) {
 	copy(order, p.order)
 	sort.Ints(order)
 
-	var out []llm.ToolCall
+	out := make([]llm.ToolCall, 0, len(order))
 	for _, index := range order {
 		block := p.blocks[index]
-		if block.kind != "tool_use" {
+		if block.kind != blockTypeToolUse {
 			continue
 		}
 		if block.name == "" {

@@ -139,7 +139,7 @@ func Test_Complete_stops_immediately_when_the_error_is_permanent(t *testing.T) {
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, llm.ErrNotRetryable)
+	require.ErrorIs(t, err, llm.ErrNotRetryable)
 	assert.Zero(t, secondaryCalls, "a permanent failure must not try the fallback: it would hide a caller bug")
 }
 
@@ -168,7 +168,7 @@ func Test_Complete_returns_ErrChainExhausted_when_every_target_is_retryable(t *t
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, llm.ErrChainExhausted)
+	require.ErrorIs(t, err, llm.ErrChainExhausted)
 	assert.Nil(t, result.Response)
 	assert.Len(t, result.Attempts, 2)
 }
@@ -229,7 +229,7 @@ func Test_Complete_stops_when_the_context_is_cancelled(t *testing.T) {
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, context.Canceled)
+	require.ErrorIs(t, err, context.Canceled)
 	assert.Zero(t, calls, "a cancelled context must not reach a provider")
 }
 

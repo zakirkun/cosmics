@@ -71,7 +71,7 @@ func Test_streamParser_emits_chunks_in_order_when_the_transcript_is_complete(t *
 	chunks := feedAll(t, parser, capturedSSE)
 
 	// Then
-	var kinds []llm.ChunkKind
+	kinds := make([]llm.ChunkKind, 0, len(chunks))
 	for _, chunk := range chunks {
 		kinds = append(kinds, chunk.Kind)
 	}
@@ -148,7 +148,7 @@ func Test_streamParser_rejects_arguments_that_never_form_valid_json(t *testing.T
 	require.Error(t, err)
 
 	var argsErr *ToolArgumentsError
-	require.True(t, errors.As(err, &argsErr))
+	require.ErrorAs(t, err, &argsErr)
 	assert.Equal(t, "call_1", argsErr.CallID)
 }
 
@@ -168,7 +168,7 @@ func Test_streamParser_marks_done_only_once_when_done_arrives_twice(t *testing.T
 
 func Test_Stream_forwards_every_chunk_and_returns_the_full_message_when_it_completes(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, capturedSSE)
 	}))
@@ -200,7 +200,7 @@ func Test_Stream_forwards_every_chunk_and_returns_the_full_message_when_it_compl
 
 func Test_Stream_aborts_and_returns_the_sink_error_when_the_callback_fails(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, capturedSSE)
 	}))

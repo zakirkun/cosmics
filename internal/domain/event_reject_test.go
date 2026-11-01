@@ -30,7 +30,7 @@ func Test_NewEvent_RejectsInput_when_KindIsUndeclared(t *testing.T) {
 			ev, err := domain.NewEvent(p)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrUnknownValue)
+			require.ErrorIs(t, err, domain.ErrUnknownValue)
 			assert.Equal(t, domain.Event{}, ev)
 		})
 	}
@@ -57,7 +57,7 @@ func Test_NewEvent_RejectsInput_when_LevelIsUndeclared(t *testing.T) {
 			ev, err := domain.NewEvent(p)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrUnknownValue)
+			require.ErrorIs(t, err, domain.ErrUnknownValue)
 			assert.Equal(t, domain.Event{}, ev)
 		})
 	}
@@ -85,8 +85,8 @@ func Test_NewEvent_RejectsInput_when_MessageIsBlank(t *testing.T) {
 			ev, err := domain.NewEvent(p)
 
 			// Then
-			assert.ErrorIs(t, err, domain.ErrEmptyMessage)
-			assert.NotErrorIs(t, err, domain.ErrUnknownValue)
+			require.ErrorIs(t, err, domain.ErrEmptyMessage)
+			require.NotErrorIs(t, err, domain.ErrUnknownValue)
 			assert.Equal(t, domain.Event{}, ev)
 		})
 	}

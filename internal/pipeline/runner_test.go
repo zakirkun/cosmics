@@ -16,7 +16,7 @@ func Test_Run_executes_every_mode_stage_in_canonical_order_when_all_pass(t *test
 	// Given
 	store := newFakeStore()
 
-	var stages []pipeline.Stage
+	stages := make([]pipeline.Stage, 0, len(domain.AllStages))
 	for _, kind := range domain.AllStages {
 		stages = append(stages, passingStage(kind))
 	}
@@ -49,7 +49,7 @@ func Test_Run_skips_stages_the_mode_excludes_when_the_mode_is_recon(t *testing.T
 	// Given
 	store := newFakeStore()
 
-	var stages []pipeline.Stage
+	stages := make([]pipeline.Stage, 0, len(domain.AllStages))
 	for _, kind := range domain.AllStages {
 		stages = append(stages, passingStage(kind))
 	}
@@ -91,7 +91,7 @@ func Test_Run_stops_when_a_stage_exit_predicate_is_unmet(t *testing.T) {
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, pipeline.ErrExitCriteriaUnmet)
+	require.ErrorIs(t, err, pipeline.ErrExitCriteriaUnmet)
 	assert.Contains(t, err.Error(), "no assets recorded", "the reason must name what is missing")
 
 	assert.Equal(t, []domain.StageKind{domain.StageRecon, domain.StageOSINT}, store.begunStages(),
@@ -118,7 +118,7 @@ func Test_Run_reports_a_missing_stage_implementation_when_one_is_absent(t *testi
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, pipeline.ErrStageMissing)
+	require.ErrorIs(t, err, pipeline.ErrStageMissing)
 	assert.Contains(t, err.Error(), "osint")
 }
 
@@ -182,7 +182,7 @@ func Test_Run_rejects_an_already_terminal_engagement_when_called(t *testing.T) {
 
 	// Then
 	require.Error(t, err)
-	assert.ErrorIs(t, err, pipeline.ErrAlreadyTerminal)
+	require.ErrorIs(t, err, pipeline.ErrAlreadyTerminal)
 	assert.Empty(t, store.begunStages())
 }
 

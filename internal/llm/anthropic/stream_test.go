@@ -86,7 +86,7 @@ func Test_eventParser_emits_chunks_in_order_when_the_transcript_is_complete(t *t
 	chunks := feedAll(t, parser, capturedEvents)
 
 	// Then
-	var kinds []llm.ChunkKind
+	kinds := make([]llm.ChunkKind, 0, len(chunks))
 	for _, chunk := range chunks {
 		kinds = append(kinds, chunk.Kind)
 	}
@@ -102,7 +102,7 @@ func Test_eventParser_emits_chunks_in_order_when_the_transcript_is_complete(t *t
 
 func Test_Stream_returns_the_merged_message_when_the_stream_completes(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, capturedEvents)
 	}))
@@ -220,7 +220,7 @@ func Test_eventParser_returns_a_typed_error_when_tool_input_streams_invalid_json
 	require.Error(t, err)
 
 	var inputErr *ToolInputError
-	require.True(t, errors.As(err, &inputErr))
+	require.ErrorAs(t, err, &inputErr)
 	assert.Equal(t, "toolu_1", inputErr.BlockID)
 }
 
@@ -265,7 +265,7 @@ func Test_Stream_requests_event_stream_when_called(t *testing.T) {
 
 func Test_Stream_aborts_and_returns_the_sink_error_when_the_callback_fails(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, capturedEvents)
 	}))
@@ -303,7 +303,7 @@ func Test_Stream_rejects_a_nil_sink_when_called(t *testing.T) {
 
 func Test_Stream_surfaces_an_error_event_when_the_provider_reports_one(t *testing.T) {
 	// Given
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, `event: error
 data: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}`)

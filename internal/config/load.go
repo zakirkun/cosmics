@@ -24,9 +24,7 @@ func Load(ctx context.Context, path string) (Config, error) {
 		return Config{}, fmt.Errorf("read %s: %w", path, err)
 	}
 
-	expanded := os.Expand(string(raw), func(key string) string {
-		return os.Getenv(key)
-	})
+	expanded := os.Expand(string(raw), os.Getenv)
 
 	cfg := Default()
 	if err := yaml.Unmarshal([]byte(expanded), &cfg); err != nil {

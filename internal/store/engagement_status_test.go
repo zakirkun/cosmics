@@ -62,8 +62,8 @@ func Test_EngagementUpdateStatus_returns_ErrIllegalMove_when_the_from_status_is_
 
 	// Then: the guard rejects it, and the row keeps the winner's state.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, domain.ErrIllegalMove)
-	assert.NotErrorIs(t, err, store.ErrNotFound)
+	require.ErrorIs(t, err, domain.ErrIllegalMove)
+	require.NotErrorIs(t, err, store.ErrNotFound)
 
 	got, err := repo.Get(t.Context(), engagement.ID)
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func Test_EngagementUpdateStatus_returns_ErrIllegalMove_when_the_transition_is_f
 
 	// Then: the domain matrix rejects it before SQL runs, so nothing changed.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, domain.ErrIllegalMove)
+	require.ErrorIs(t, err, domain.ErrIllegalMove)
 
 	got, err := repo.Get(t.Context(), engagement.ID)
 	require.NoError(t, err)
@@ -108,7 +108,7 @@ func Test_EngagementUpdateStatus_returns_ErrNotFound_when_the_engagement_is_abse
 
 	// Then: the missing row is distinguishable from a lost race.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, store.ErrNotFound)
+	require.ErrorIs(t, err, store.ErrNotFound)
 	assert.NotErrorIs(t, err, domain.ErrIllegalMove)
 }
 
@@ -126,7 +126,7 @@ func Test_EngagementUpdateStatus_rejects_an_unknown_stage_when_the_pointer_is_in
 
 	// Then: it is rejected and the row is untouched.
 	require.Error(t, err)
-	assert.ErrorIs(t, err, domain.ErrUnknownStage)
+	require.ErrorIs(t, err, domain.ErrUnknownStage)
 
 	got, err := repo.Get(t.Context(), engagement.ID)
 	require.NoError(t, err)

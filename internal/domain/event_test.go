@@ -184,7 +184,7 @@ func Test_NewEvent_BuildsEvent_when_ParametersAreValid(t *testing.T) {
 	require.Equal(t, domain.EventToolStart, ev.Kind)
 	require.Equal(t, domain.LevelWarn, ev.Level)
 	require.Equal(t, "launching sqlmap", ev.Message)
-	require.Equal(t, `{"argv":["--batch"]}`, ev.DetailJSON)
+	require.JSONEq(t, `{"argv":["--batch"]}`, ev.DetailJSON)
 	require.Equal(t, refTime, ev.CreatedAt)
 	require.True(t, ev.ID.IsZero(), "the store assigns the identifier")
 	require.True(t, ev.CreatedAt.Time().Equal(refTime.Time()))
@@ -211,7 +211,7 @@ func Test_NewEvent_DefaultsDetailJSON_when_DetailIsEmpty(t *testing.T) {
 			ev, err := domain.NewEvent(p)
 
 			// Then
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, ev.DetailJSON)
 		})
 	}

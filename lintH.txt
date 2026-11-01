@@ -1,0 +1,9 @@
+internal\domain\target_reject_test.go:150:4: require-error: for error assertions use require (testifylint)
+			assert.ErrorIs(t, err, domain.ErrBadTarget, "metacharacter %q must be rejected", tt.char)
+			^
+internal\domain\event_reject_test.go:60:4: require-error: for error assertions use require (testifylint)
+			assert.ErrorIs(t, err, domain.ErrUnknownValue)
+			^
+internal\domain\target_test.go:74:4: require-error: for error assertions use require (testifylint)
+			assert.NoError(t, err)
+			^
