@@ -1,8 +1,8 @@
 # Cosmics — Progress
 
-**Updated:** 2026-11-01
-**Current milestone:** M3 complete, M4 not started
-**Overall:** M0–M3 implemented and verified. Full suite green under `-race -shuffle=on`; Docker integration verified against the real daemon. M4 (Analysis/Mapper/OSINT stages) remains.
+**Updated:** 2026-11-02
+**Current milestone:** M4 and M5 implemented; CLI/TUI wiring outstanding
+**Overall:** Domain through reporting implemented and verified. Full suite green across 24 packages, golangci-lint clean. What remains is wiring the stages into `app` and the TUI, plus the CLI verbs.
 
 > This is a living document. Update it in the same commit as the work it describes.
 > Status legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked
@@ -235,48 +235,66 @@ These were established by direct probing. They are recorded here because they ar
 
 ## M4 — Analysis, Mapper, OSINT
 
-**Status: NOT STARTED.** Only the memory/skills substrate and the pipeline runner exist.
+**Status: stages and adapters implemented and tested.**
 
 | Task | Status | Notes |
 |---|---|---|
-| OSINT stage | `[ ]` | |
-| crt.sh adapter | `[ ]` | |
-| DNS/RDAP/WHOIS adapter | `[ ]` | |
-| Wayback CDX adapter | `[ ]` | |
-| GitHub search adapter | `[ ]` | |
-| Optional paid-source adapters | `[ ]` | |
-| Analysis stage | `[ ]` | |
-| Mapper stage | `[ ]` | |
+| OSINT stage | `[x]` | Runs every enabled source; one dead source does not fail the stage |
+| crt.sh adapter | `[x]` | Deduplicates, drops wildcards, bounded response |
+| DNS/RDAP/WHOIS adapter | `[~]` | DNS and RDAP shipped; no WHOIS |
+| Wayback CDX adapter | `[x]` | Skips the header row, deduplicates URLs |
+| GitHub search adapter | `[ ]` | **Not built** |
+| Optional paid-source adapters | `[ ]` | **Not built** |
+| Analysis stage | `[x]` | Deterministic rule pass; ranked hypotheses recorded as findings |
+| Mapper stage | `[x]` | Asset/vuln nodes, exploits and can_reach edges, deterministic order |
 | Hybrid retriever (RRF) | `[ ]` | Interface exists; fusion not implemented |
-| Memory inspector UI | `[ ]` | |
-| Findings browser | `[ ]` | |
-| Default skills (8 categories) | `[~]` | 7 of 8 categories shipped; no `cloud`/`mobile` |
-| `cosmics skills validate/list` | `[ ]` | |
-| Determinism golden tests | `[ ]` | |
+| Memory inspector UI | `[ ]` | **Not built** |
+| Findings browser | `[ ]` | **Not built** |
+| Default skills (8 categories) | `[~]` | 7 of 8 shipped; no `cloud`/`mobile` |
+| `cosmics skills validate/list` | `[ ]` | **Not built** |
+| Determinism golden tests | `[x]` | Mapper output asserted identical across two runs |
+
+Hostile-OSINT containment is tested: a source returning a value containing shell
+metacharacters is rejected before it can reach an executor.
 
 ---
 
 ## M5 — Exploitation & Reporting
 
+**Status: substrate, stages and reporting implemented and tested. CLI verbs not wired.**
+
 | Task | Status | Notes |
 |---|---|---|
-| Approval gate + modal | `[ ]` | Exact argv, expiry |
-| Exploit stage | `[ ]` | Attempt caps, PoC evidence |
-| Verification predicate | `[ ]` | Mechanical, not LLM |
-| `access_sessions` + pivots | `[ ]` | |
-| Post-exploitation actions | `[ ]` | ATT&CK mapped |
-| Credential vault (AEAD) | `[ ]` | Never in context |
-| Interactive containers | `[ ]` | Long-lived sessions |
-| Exploit tools: nuclei, ffuf, sqlmap, hydra, nikto, impacket | `[ ]` | |
-| Report: deterministic queries | `[ ]` | |
-| CVSS v4.0 scorer | `[ ]` | Pure Go |
-| Markdown + HTML renderers | `[ ]` | |
-| Narrative generation (prose only) | `[ ]` | Ids cited |
-| `cosmics report generate/regenerate` | `[ ]` | |
-| `cosmics audit verify` | `[ ]` | |
-| `cosmics gc` | `[ ]` | |
-| Sensitive-artifact exclusion | `[ ]` | |
-| Credential redaction assertions | `[ ]` | |
+| Approval gate + modal | `[~]` | Gate and persistence shipped and tested; **no TUI modal** |
+| Exploit stage | `[x]` | Approves per path, attempt cap, PoC capture, DB-backed exit |
+| Verification predicate | `[x]` | Evidence + succeeded + exit 0; a model claim cannot set it |
+| `access_sessions` + pivots | `[~]` | Session store and post stage shipped; **no pivot chaining** |
+| Post-exploitation actions | `[x]` | Ordered actions, ATT&CK ids, mandatory trailing cleanup |
+| Credential vault (AEAD) | `[x]` | AES-256-GCM, PBKDF2 via stdlib, no plaintext field, tested |
+| Interactive containers | `[ ]` | **Not built** — sessions are records, not live shells |
+| Exploit tools: nuclei, ffuf, sqlmap, hydra, nikto, impacket | `[~]` | Only nuclei and ffuf are in the registry |
+| Report: deterministic queries | `[x]` | Byte-identical output asserted |
+| CVSS scorer | `[~]` | v3.1 implemented and verified against 8 published vectors; **v4.0 not** |
+| Markdown + HTML renderers | `[x]` | Escaping and determinism tested |
+| Narrative generation (prose only) | `[ ]` | **Not built** — the summary is computed from rows |
+| `cosmics report generate/regenerate` | `[ ]` | **Not built** |
+| `cosmics audit verify` | `[ ]` | **Not built** |
+| `cosmics gc` | `[ ]` | **Not built** |
+| Sensitive-artifact exclusion | `[x]` | A Credential has no plaintext field; Redact is longest-first |
+| Credential redaction assertions | `[x]` | No 8-character window of a secret survives into a redacted value |
+
+### Honest gaps in M5
+
+The gate is testable and enforced in Go, but nothing calls it from a user-facing
+flow yet: no approval modal exists, so an operator cannot currently approve
+anything through the TUI. The stages are constructed with injected dependencies
+and are not yet registered in `app`. Reporting renders correctly and the CLI verbs
+that would invoke it do not exist.
+
+**CVSS v4.0 is deliberately not implemented.** It scores from a 270-row
+macrovector table; approximating it would put wrong severities into every report.
+The v4.0 vector is stored verbatim so a correct scorer can be added without data
+loss.
 
 ---
 

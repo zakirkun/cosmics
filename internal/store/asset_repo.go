@@ -84,7 +84,7 @@ const upsertAssetSQL = `INSERT INTO assets (` + assetColumns + `)
 //
 // A duplicate observation updates only the volatile columns: the canonical id
 // and first_seen_at survive, so foreign keys stay stable. Provenance is
-// monotone Ã¢â‚¬â€ an OSINT source replaces a non-OSINT one but never the reverse Ã¢â‚¬â€
+// monotone — an OSINT source replaces a non-OSINT one but never the reverse —
 // so a later recon re-run cannot erase how the asset was discovered.
 func (r *AssetRepo) Upsert(ctx context.Context, asset Asset) (Asset, error) {
 	if err := normalizeAsset(&asset); err != nil {
