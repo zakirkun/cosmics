@@ -40,6 +40,17 @@ type Runner struct {
 	stages map[domain.StageKind]Stage
 	store  RunStore
 	clock  domain.Clock
+
+	progress func(domain.StageKind)
+}
+
+// SetProgressHook installs a callback invoked as each stage is entered.
+//
+// A hook rather than a field on RunnerOptions keeps construction unchanged for
+// every existing caller, and nil remains valid: a run nobody watches is still a
+// run.
+func (r *Runner) SetProgressHook(hook func(domain.StageKind)) {
+	r.progress = hook
 }
 
 // RunnerOptions configures a Runner.
@@ -106,6 +117,10 @@ func (r *Runner) Run(ctx context.Context, engagement domain.Engagement) (domain.
 		case <-ctx.Done():
 			return engagement, fmt.Errorf("pipeline cancelled before %s: %w", kind, ctx.Err())
 		default:
+		}
+
+		if r.progress != nil {
+			r.progress(kind)
 		}
 
 		next, err := r.runStage(ctx, engagement, kind)

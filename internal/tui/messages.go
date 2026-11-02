@@ -15,3 +15,13 @@ type EngagementsLoadedMsg struct {
 type ErrorMsg struct {
 	Err error
 }
+
+// EngagementDraftedMsg carries a validated engagement out of the new-engagement
+// form.
+//
+// The form does not persist. It hands the engagement upward so the application
+// owns the write, which keeps the TUI free of a database dependency and lets a test
+// assert the drafted value without a store.
+type EngagementDraftedMsg struct {
+	Engagement domain.Engagement
+}

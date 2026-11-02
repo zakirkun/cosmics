@@ -44,6 +44,31 @@ type Options struct {
 	Operator string
 	DataDir  string
 	Version  string
+
+	// Clock supplies the instant recorded when an engagement is drafted. It is
+	// injected so a test can draft one without reading the wall clock.
+	Clock domain.Clock
+
+	// OnDraft persists a drafted engagement. The shell calls it when a draft is
+	// submitted; a nil callback keeps the draft in memory only, which is what a
+	// test and a read-only preview want.
+	OnDraft func(engagement domain.Engagement, targets []domain.Target) tea.Cmd
+
+	// OnRun persists an engagement and drives it through the pipeline. Typing a
+	// target calls this rather than OnDraft, because the operator asked to test a
+	// host, not to file a row.
+	OnRun func(engagement domain.Engagement, targets []domain.Target) tea.Cmd
+
+	// OnResume runs an engagement that already exists, which is what pressing
+	// enter on a draft does.
+	OnResume func(engagement domain.Engagement) tea.Cmd
+
+	// LoadFindings, LoadMemory and LoadSettings fetch the data each read-only
+	// screen shows. A nil callback leaves that screen empty rather than failing,
+	// so a shell can be constructed before the store is wired.
+	LoadFindings func(engagementID string) tea.Cmd
+	LoadMemory   func(engagementID string) tea.Cmd
+	LoadSettings func() tea.Cmd
 }
 
 // Model is the root bubbletea model.
@@ -61,6 +86,13 @@ type Model struct {
 	cursor        int
 	err           error
 	quitting      bool
+
+	clock  domain.Clock
+	target TargetInput
+
+	findings FindingsView
+	memory   MemoryView
+	settings SettingsView
 
 	viewport *viewport.Model
 	input    textinput.Model
@@ -93,6 +125,10 @@ func New(opts Options) Model {
 		viewport: &vp,
 		input:    input,
 		spinner:  spinner.New(spinner.WithSpinner(spinner.Line)),
+		clock:    opts.Clock,
+		target:   NewTargetInput(),
+		findings: NewFindingsView(),
+		memory:   NewMemoryView(),
 	}
 }
 

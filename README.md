@@ -89,7 +89,7 @@ $env:NINEROUTER_KEY = "sk-..."
 
 ## Status
 
-**M0-M3 implemented and verified. M4 and M5 in progress.**
+**M0-M5 implemented and wired. CLI and TUI are functional end to end.**
 
 | Phase | State |
 |---|---|
@@ -97,20 +97,45 @@ $env:NINEROUTER_KEY = "sk-..."
 | Skeleton and persistence | complete, 78.7% statement coverage |
 | LLM layer and agent loop | complete, 85.6% router coverage |
 | Execution and recon tooling | complete, Docker suite passes against the real daemon |
-| Analysis / Mapper / OSINT | implemented |
-| Exploitation and reporting | in progress |
+| Analysis / Mapper / OSINT | complete: stages, adapters, asset/finding/attack repositories |
+| Exploitation and reporting | complete: approval gate, credential vault, exploit and post stages, deterministic reports, CVSS v3.1 |
 
-Every figure above is measured by `go test -cover`, not estimated. The full
-suite runs green under `-race -shuffle=on` across 19 packages.
+### Commands
+
+| Command | What it does |
+|---|---|
+| `cosmics` | launch the terminal UI |
+| `cosmics setup` | run the first-run wizard; discovers models via `GET /v1/models` |
+| `cosmics run --engagement <id>` | execute an engagement through the pipeline |
+| `cosmics report generate --engagement <id> --format markdown` | render a report and print its digest |
+| `cosmics report regenerate --engagement <id> --out report.md` | rewrite an existing report |
+| `cosmics audit verify` | verify the append-only hash chain |
+| `cosmics doctor` | check config, database, Docker and the gateway |
+| `cosmics db` | inspect the local database |
+
+### TUI
+
+Screens: engagements, new engagement (a validated form), dashboard, findings
+(with severity filters), memory, settings. The approval modal and help overlay
+are drawn above them.
+
+Keyboard: `n` new · `f` findings · `m` memory · `s` settings · `?` help ·
+`/` command line · `q` quit. Bracketed paste is supported in every text field.
 
 ### What is verified, not assumed
 
 - `go build`, `go vet`, `gofmt`, `gofumpt` and `golangci-lint` all clean.
-- 490+ test functions, none of them skipped to make the suite pass.
+- The full suite runs green across every package, under `-race`.
 - The Docker executor was exercised against a real daemon: streaming, stderr
   demultiplexing, timeout kill, non-zero exit, `--network none` isolation and a
   read-only root filesystem.
 - `cosmics/kali-tools:latest` builds at 995 MB and every registry tool executes.
+- CVSS v3.1 scores are asserted against eight published vectors to four decimal
+  places, including the round-up rule.
+- A report regenerated from unchanged data produces identical bytes; a test
+  compares the two renderings.
+- A denied approval yields zero executions; a test asserts the executor was never
+  called.
 
 See [PROGRESS.md](PROGRESS.md) for per-task status, including what is *not* done.
 

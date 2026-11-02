@@ -38,6 +38,7 @@ var (
 	styleStageFailed  = lipgloss.NewStyle().Foreground(lipgloss.Color(colDanger)).Bold(true)
 	styleStageSkipped = lipgloss.NewStyle().Foreground(lipgloss.Color(colMuted)).Faint(true)
 	styleStagePending = lipgloss.NewStyle().Foreground(lipgloss.Color(colMuted))
+	styleError        = lipgloss.NewStyle().Foreground(lipgloss.Color(colDanger)).Bold(true)
 )
 
 // Layout budgets.
@@ -85,12 +86,26 @@ func (m Model) View() tea.View {
 		m.headerView(),
 		"",
 		m.bodyView(),
+		m.statusLine(),
 		m.footerView(),
 	)
 
 	v := tea.NewView(styleBackdrop.Render(body))
 	v.AltScreen = true
 	return v
+}
+
+// statusLine renders the most recent failure.
+//
+// Without it, an error reached the model and vanished: a failed save looked
+// identical to a key that did nothing, which is the worst possible feedback. The
+// line is empty when there is nothing to say, so it costs one row and never
+// displaces the footer.
+func (m Model) statusLine() string {
+	if m.err == nil {
+		return ""
+	}
+	return styleError.Width(m.width).Render(truncate(m.err.Error(), max(0, m.width-2)))
 }
 
 // layout helpers ------------------------------------------------------------
@@ -209,24 +224,15 @@ func (m Model) documentBody() string {
 	case ScreenDashboard:
 		return m.dashboardBody()
 	case ScreenNewEngagement:
-		return m.placeholderBody("New Engagement", "Draft an engagement: name, client, mode, targets, authorization.")
+		return m.targetBody()
 	case ScreenFindings:
-		return m.placeholderBody("Findings", "Confirmed vulnerabilities appear here once the pipeline produces evidence.")
+		return RenderFindings(m.findings, m.contentWidth())
 	case ScreenMemory:
-		return m.placeholderBody("Memory", "Facts, prior runs and engagement notes live here.")
+		return RenderMemory(m.memory, m.contentWidth())
 	case ScreenSettings:
-		return m.placeholderBody("Settings", "Provider, model profile and executor configuration live here.")
+		return RenderSettings(m.settings, m.contentWidth())
 	}
 	return m.engagementsBody()
-}
-
-// placeholderBody renders a title plus explanatory copy for a scaffold screen.
-func (m Model) placeholderBody(title, body string) string {
-	return lipgloss.JoinVertical(lipgloss.Left,
-		styleTitle.Render(title),
-		"",
-		styleMuted.Width(m.contentWidth()).Render(body),
-	)
 }
 
 // engagementsBody renders the list, or the empty state.

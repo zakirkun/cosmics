@@ -12,7 +12,9 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/cosmics/cosmics/internal/clock"
 	"github.com/cosmics/cosmics/internal/config"
+	"github.com/cosmics/cosmics/internal/domain"
 	"github.com/cosmics/cosmics/internal/store"
 	"github.com/cosmics/cosmics/internal/tui"
 	"github.com/cosmics/cosmics/internal/version"
@@ -102,13 +104,39 @@ func Run(ctx context.Context, cfg config.Config) error {
 		return fmt.Errorf("load engagements: %w", err)
 	}
 
+	loaders, err := tuiLoaders(ctx, db.DB, cfg)
+	if err != nil {
+		return err
+	}
+
+	var program *tea.Program
+
+	runner := &submitter{
+		db: db.DB,
+		run: func(runCtx context.Context, engagement domain.Engagement, progress func(domain.StageKind)) (domain.Engagement, error) {
+			return RunEngagement(runCtx, db.DB, clock.NewSystem(), engagement, progress)
+		},
+		send: func(msg tea.Msg) {
+			if program != nil {
+				program.Send(msg)
+			}
+		},
+	}
+
 	model := tui.New(tui.Options{
-		Operator: cfg.App.Operator,
-		DataDir:  cfg.App.DataDir,
-		Version:  version.String(),
+		Operator:     cfg.App.Operator,
+		DataDir:      cfg.App.DataDir,
+		Version:      version.String(),
+		Clock:        clock.NewSystem(),
+		OnRun:        runner.OnRun,
+		OnResume:     runner.RunExisting,
+		OnDraft:      runner.OnDraft,
+		LoadFindings: loaders.findings,
+		LoadMemory:   loaders.memory,
+		LoadSettings: loaders.settings,
 	})
 
-	program := tea.NewProgram(model)
+	program = tea.NewProgram(model)
 
 	// Send, not constructor injection: the event loop must be running before the
 	// list arrives, or the first frame blocks on database I/O.

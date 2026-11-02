@@ -32,3 +32,4 @@ config.yaml
 *.db-shm
 
 .omo/
+.claude/

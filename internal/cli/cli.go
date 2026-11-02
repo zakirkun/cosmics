@@ -42,7 +42,7 @@ func Run(args []string) error {
 	flags.Usage = func() {
 		fmt.Fprintf(flags.Output(), "Cosmics — terminal-native penetration-testing platform\n\n")
 		fmt.Fprintf(flags.Output(), "Usage:\n  cosmics [flags] [command]\n\n")
-		fmt.Fprintf(flags.Output(), "Commands:\n  (none)   launch the interactive TUI\n  setup    run the first-run wizard and write ~/.cosmics/config.yaml\n  doctor   verify configuration, database, Docker, and the LLM gateway\n  db       inspect the local database\n\n")
+		fmt.Fprintf(flags.Output(), "Commands:\n  (none)   launch the interactive TUI\n  setup    run the first-run wizard and write ~/.cosmics/config.yaml\n  run      execute an engagement through the pipeline\n  report   generate or regenerate a report (markdown or html)\n  audit    verify the append-only audit chain\n  doctor   verify configuration, database, Docker, and the LLM gateway\n  db       inspect the local database\n\n")
 		fmt.Fprintf(flags.Output(), "Flags:\n")
 		flags.PrintDefaults()
 	}
@@ -86,13 +86,19 @@ func Run(args []string) error {
 		return runDoctor(ctx, cfg, flags.Output())
 	case "db":
 		return runDB(ctx, cfg, rest[1:])
+	case "report":
+		return runReport(ctx, cfg, rest[1:], flags.Output())
+	case "audit":
+		return runAudit(ctx, cfg, rest[1:], flags.Output())
+	case "run":
+		return runEngagement(ctx, cfg, rest[1:], flags.Output())
 	}
 	return nil
 }
 
 func knownCommand(command string) bool {
 	switch command {
-	case "", "setup", "doctor", "db":
+	case "", "setup", "doctor", "db", "report", "audit", "run":
 		return true
 	}
 	return false

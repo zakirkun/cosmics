@@ -56,6 +56,7 @@ type State struct {
 	selected  int
 	model     string
 	profile   string
+	savedTo   string
 }
 
 // NewState starts the wizard at the welcome step with a seeded endpoint.
@@ -187,6 +188,30 @@ func (s State) Filtered() []string { return append([]string(nil), s.filtered...)
 
 // SelectedIndex reports the highlighted position within the filtered list.
 func (s State) SelectedIndex() int { return s.selected }
+
+// Choice is one selectable model rendered by the TUI.
+type Choice struct {
+	Name     string
+	Selected bool
+}
+
+// Choices renders the filtered list with the highlight applied.
+func (s State) Choices() []Choice {
+	out := make([]Choice, 0, len(s.filtered))
+	for index, name := range s.filtered {
+		out = append(out, Choice{Name: name, Selected: index == s.selected})
+	}
+	return out
+}
+
+// WithSavedPath records where the configuration was written.
+func (s State) WithSavedPath(path string) State {
+	s.savedTo = path
+	return s
+}
+
+// SavedPath reports where the configuration was written.
+func (s State) SavedPath() string { return s.savedTo }
 
 // SelectedModel reports the highlighted model, or the empty string when the
 // filtered list is empty.

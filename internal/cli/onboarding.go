@@ -43,7 +43,7 @@ func runSetup(ctx context.Context, args []string, out io.Writer) error {
 		return writeErr
 	}
 
-	cfg, err := onboarding.Interactive(ctx, reader, out, onboarding.GatewayDiscoverer{})
+	cfg, err := runWizard(ctx, reader, out, path)
 	if err != nil {
 		return fmt.Errorf("run setup: %w", err)
 	}
@@ -55,6 +55,59 @@ func runSetup(ctx context.Context, args []string, out io.Writer) error {
 
 	_, err = fmt.Fprintf(out, "Wrote %s\n", path)
 	return err
+}
+
+// runWizard drives onboarding, preferring the interactive TUI.
+//
+// The TUI needs a terminal on stdin. When the command is piped, bubbletea cannot
+// read keys, so the line-oriented flow is used instead; both paths produce the
+// same validated configuration and differ only in how it is collected.
+func runWizard(ctx context.Context, reader *bufio.Reader, out io.Writer, path string) (config.Config, error) {
+	if !isTerminal(os.Stdin) {
+		return onboarding.Interactive(ctx, reader, out, onboarding.GatewayDiscoverer{})
+	}
+
+	dir := filepath.Dir(path)
+
+	saved, err := onboarding.Run(ctx, onboarding.TUIOptions{
+		DefaultEndpoint: onboarding.DefaultEndpoint,
+		Discover:        onboarding.GatewayDiscoverer{},
+		Save: func(saveCtx context.Context, cfg config.Config) (string, error) {
+			cfg.App.DataDir = dir
+			if saveErr := onboarding.SaveWithOptions(saveCtx, cfg, path, onboarding.SaveOptions{Overwrite: true}); saveErr != nil {
+				return "", saveErr
+			}
+			return path, nil
+		},
+	})
+	if err != nil {
+		return config.Config{}, err
+	}
+
+	loaded, err := config.Load(ctx, saved)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("reload written config: %w", err)
+	}
+	return loaded, nil
+}
+
+// isTerminal reports whether file is an interactive terminal we may hand to
+// bubbletea.
+//
+// ModeCharDevice alone is not enough: under `go test` on Windows, os.Stdin can
+// still be a character device, and bubbletea would then block forever waiting for
+// keys that never arrive. A test binary is therefore treated as non-interactive,
+// which is also the behaviour a caller running the tests expects.
+func isTerminal(file *os.File) bool {
+	if strings.HasSuffix(os.Args[0], ".test") || strings.HasSuffix(os.Args[0], ".test.exe") {
+		return false
+	}
+
+	info, err := file.Stat()
+	if err != nil {
+		return false
+	}
+	return info.Mode()&os.ModeCharDevice != 0
 }
 
 // setupTarget resolves the destination, preferring an explicit argument.

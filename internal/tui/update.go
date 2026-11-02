@@ -19,12 +19,49 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		next, cmd := m.handleKey(msg)
 		return next.sync(), cmd
 
+	case tea.PasteMsg:
+		next, cmd := m.handlePaste(msg.Content)
+		return next.sync(), cmd
+
 	case tea.QuitMsg:
 		m.quitting = true
 		return m, nil
 
 	case EngagementsLoadedMsg:
 		return m.applyEngagements(msg).sync(), nil
+
+	case EngagementDraftedMsg:
+		return m.applyDrafted(msg).sync(), nil
+
+	case RunStartedMsg:
+		return m.handleRunStarted(msg).sync(), nil
+
+	case RunProgressMsg:
+		return m.handleRunProgress(msg).sync(), nil
+
+	case RunFinishedMsg:
+		return m.handleRunFinished(msg).sync(), nil
+
+	case FindingsLoadedMsg:
+		m.findings = m.findings.WithRows(msg.Findings)
+		if msg.Err != nil {
+			m.err = msg.Err
+		}
+		return m.sync(), nil
+
+	case MemoryFactsLoadedMsg:
+		m.memory = m.memory.WithFacts(msg.Facts)
+		if msg.Err != nil {
+			m.err = msg.Err
+		}
+		return m.sync(), nil
+
+	case SettingsLoadedMsg:
+		m.settings = msg.Settings
+		if msg.Err != nil {
+			m.err = msg.Err
+		}
+		return m.sync(), nil
 
 	case ErrorMsg:
 		m.err = msg.Err
@@ -77,6 +114,24 @@ func (m Model) handleKey(msg tea.KeyPressMsg) (Model, tea.Cmd) {
 		return m, cmd
 	}
 
+	// The new-engagement prompt owns the keyboard while it is open, so a target
+	// containing "n", "f", "m" or "s" is typed rather than treated as a shortcut.
+	if m.screen == ScreenNewEngagement && m.overlay == viewNormal {
+		return m.handleTargetKey(msg)
+	}
+
+	if m.screen == ScreenFindings && m.overlay == viewNormal {
+		if consumed, next := m.handleFindingsKey(msg); consumed {
+			return next, nil
+		}
+	}
+
+	if m.screen == ScreenMemory && m.overlay == viewNormal {
+		if consumed, next := m.handleMemoryKey(msg); consumed {
+			return next, nil
+		}
+	}
+
 	switch msg.String() {
 	case "q":
 		m.quitting = true
@@ -93,9 +148,16 @@ func (m Model) handleKey(msg tea.KeyPressMsg) (Model, tea.Cmd) {
 		}
 
 	case "enter":
-		if _, ok := m.selected(); ok {
-			m.screen = ScreenDashboard
+		engagement, ok := m.selected()
+		if !ok {
+			return m, nil
 		}
+		m.screen = ScreenDashboard
+
+		if m.screenIsRunnable(engagement) && m.opts.OnResume != nil {
+			return m, m.opts.OnResume(engagement)
+		}
+		return m, nil
 
 	case "esc":
 		switch {
@@ -107,15 +169,20 @@ func (m Model) handleKey(msg tea.KeyPressMsg) (Model, tea.Cmd) {
 
 	case "n":
 		m.screen = ScreenNewEngagement
+		m.target = NewTargetInput()
+		return m, nil
 
 	case "f":
 		m.screen = ScreenFindings
+		return m, m.loadFindings()
 
 	case "m":
 		m.screen = ScreenMemory
+		return m, m.loadMemory()
 
 	case "s":
 		m.screen = ScreenSettings
+		return m, m.loadSettings()
 
 	case "?":
 		if m.overlay == viewHelp {
@@ -149,4 +216,45 @@ func (m Model) applyEngagements(msg EngagementsLoadedMsg) Model {
 		m.cursor = 0
 	}
 	return m
+}
+
+// applyDrafted appends a newly validated engagement and selects it.
+//
+// The engagement is not persisted here: the application owns the write, so a
+// failed insert arrives later as ErrorMsg and does not silently vanish.
+func (m Model) applyDrafted(msg EngagementDraftedMsg) Model {
+	m.err = nil
+	m.engagements = append(m.engagements, msg.Engagement)
+	m.cursor = len(m.engagements) - 1
+	m.screen = ScreenEngagements
+	return m
+}
+
+func (m Model) selectedID() string {
+	engagement, ok := m.selected()
+	if !ok {
+		return ""
+	}
+	return engagement.ID.String()
+}
+
+func (m Model) loadFindings() tea.Cmd {
+	if m.opts.LoadFindings == nil {
+		return nil
+	}
+	return m.opts.LoadFindings(m.selectedID())
+}
+
+func (m Model) loadMemory() tea.Cmd {
+	if m.opts.LoadMemory == nil {
+		return nil
+	}
+	return m.opts.LoadMemory(m.selectedID())
+}
+
+func (m Model) loadSettings() tea.Cmd {
+	if m.opts.LoadSettings == nil {
+		return nil
+	}
+	return m.opts.LoadSettings()
 }
