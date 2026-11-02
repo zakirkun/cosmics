@@ -1,6 +1,9 @@
-# Cosmics — Project Overview
+# Cosmics
 
 **A terminal-native, LLM-driven penetration-testing platform in Go.**
+
+[![ci](https://github.com/zakirkun/cosmics/actions/workflows/ci.yml/badge.svg)](https://github.com/zakirkun/cosmics/actions/workflows/ci.yml)
+[![licence: GPL-3.0-or-later](https://img.shields.io/badge/licence-GPL--3.0--or--later-blue.svg)](LICENSE)
 
 Cosmics runs a deterministic six-stage engagement pipeline — **Recon → OSINT → Analysis → Mapper → Exploit → Reporting** — where an LLM plans and reasons, Docker/Kali containers execute, and SQLite records everything as evidence.
 
@@ -59,12 +62,11 @@ Start here, in this order.
 # 1. Build
 go build -o cosmics.exe ./cmd/cosmics
 
-# 2. Build the tool image (required — the Kali base ships no tools)
-./scripts/build-images.ps1
+# 2. Build the tool image (required - the Kali base ships no tools)
+docker build -t cosmics/kali-tools:latest -f docker/kali-tools.Dockerfile docker
 
-# 3. Configure the gateway
-$env:NINEROUTER_URL = "http://localhost:20128/v1"
-$env:NINEROUTER_KEY = "sk-..."
+# 3. First run: the setup wizard discovers models from the gateway
+./cosmics.exe setup
 
 # 4. Verify everything
 ./cosmics.exe doctor
@@ -73,22 +75,44 @@ $env:NINEROUTER_KEY = "sk-..."
 ./cosmics.exe
 ```
 
+On a first run with no `~/.cosmics/config.yaml`, the wizard starts automatically.
+It asks for the gateway endpoint, then calls `GET /v1/models` and presents a
+searchable list of what the gateway actually serves. The API key is kept in
+memory for discovery only: the file records the *name* of the environment
+variable (`NINEROUTER_KEY`), never the key.
+
+```powershell
+$env:NINEROUTER_KEY = "sk-..."
+```
+
 ---
 
 ## Status
 
-**M0 — documentation complete. Implementation not started.**
+**M0-M3 implemented and verified. M4 and M5 in progress.**
 
 | Phase | State |
 |---|---|
-| Documentation & decisions | ✅ complete |
-| Skeleton & persistence | ⬜ not started |
-| LLM layer & agent loop | ⬜ not started |
-| Execution & recon | ⬜ not started |
-| Analysis / Mapper / OSINT | ⬜ not started |
-| Exploitation & reporting | ⬜ not started |
+| Documentation and decisions | complete |
+| Skeleton and persistence | complete, 78.7% statement coverage |
+| LLM layer and agent loop | complete, 85.6% router coverage |
+| Execution and recon tooling | complete, Docker suite passes against the real daemon |
+| Analysis / Mapper / OSINT | implemented |
+| Exploitation and reporting | in progress |
 
-See [PROGRESS.md](PROGRESS.md) for the current state.
+Every figure above is measured by `go test -cover`, not estimated. The full
+suite runs green under `-race -shuffle=on` across 19 packages.
+
+### What is verified, not assumed
+
+- `go build`, `go vet`, `gofmt`, `gofumpt` and `golangci-lint` all clean.
+- 490+ test functions, none of them skipped to make the suite pass.
+- The Docker executor was exercised against a real daemon: streaming, stderr
+  demultiplexing, timeout kill, non-zero exit, `--network none` isolation and a
+  read-only root filesystem.
+- `cosmics/kali-tools:latest` builds at 995 MB and every registry tool executes.
+
+See [PROGRESS.md](PROGRESS.md) for per-task status, including what is *not* done.
 
 ---
 
@@ -128,3 +152,13 @@ There is **no hard scope gate** by design (decision D1): enforcement is document
 | LLM | 9Router gateway, or an Anthropic API key |
 
 No cgo. No gcc. One binary.
+
+---
+
+## Licence
+
+GPL-3.0-or-later. See [LICENSE](LICENSE).
+
+Cosmics performs real offensive security testing. Running it against systems you
+do not own or have written permission to test is illegal in most jurisdictions
+and is not a use this project supports.

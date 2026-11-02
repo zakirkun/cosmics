@@ -16,6 +16,7 @@ import (
 	"github.com/cosmics/cosmics/internal/app"
 	"github.com/cosmics/cosmics/internal/config"
 	"github.com/cosmics/cosmics/internal/doctor"
+	"github.com/cosmics/cosmics/internal/onboarding"
 	"github.com/cosmics/cosmics/internal/version"
 )
 
@@ -41,7 +42,7 @@ func Run(args []string) error {
 	flags.Usage = func() {
 		fmt.Fprintf(flags.Output(), "Cosmics — terminal-native penetration-testing platform\n\n")
 		fmt.Fprintf(flags.Output(), "Usage:\n  cosmics [flags] [command]\n\n")
-		fmt.Fprintf(flags.Output(), "Commands:\n  (none)   launch the interactive TUI\n  doctor   verify configuration, database, Docker, and the LLM gateway\n  db       inspect the local database\n\n")
+		fmt.Fprintf(flags.Output(), "Commands:\n  (none)   launch the interactive TUI\n  setup    run the first-run wizard and write ~/.cosmics/config.yaml\n  doctor   verify configuration, database, Docker, and the LLM gateway\n  db       inspect the local database\n\n")
 		fmt.Fprintf(flags.Output(), "Flags:\n")
 		flags.PrintDefaults()
 	}
@@ -63,6 +64,13 @@ func Run(args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	if command == "setup" {
+		return runSetup(ctx, rest[1:], flags.Output())
+	}
+	if !knownCommand(command) {
+		return fmt.Errorf("command %q: %w", command, ErrUnknownCommand)
+	}
+
 	cfg, err := loadConfig(ctx, *configPath, *dataDir)
 	if err != nil {
 		return err
@@ -78,13 +86,21 @@ func Run(args []string) error {
 		return runDoctor(ctx, cfg, flags.Output())
 	case "db":
 		return runDB(ctx, cfg, rest[1:])
-	default:
-		return fmt.Errorf("command %q: %w", command, ErrUnknownCommand)
 	}
+	return nil
 }
 
-// loadConfig prefers an explicit path, then the default data directory, then a
-// pure-environment fallback so the tool is usable with no file at all.
+func knownCommand(command string) bool {
+	switch command {
+	case "", "setup", "doctor", "db":
+		return true
+	}
+	return false
+}
+
+// loadConfig prefers an explicit path, then the default data directory, then
+// the environment. A first run with nothing configured is sent through the
+// setup wizard instead of silently guessing a gateway.
 func loadConfig(ctx context.Context, explicitPath, dataDirOverride string) (config.Config, error) {
 	if explicitPath != "" {
 		cfg, err := config.Load(ctx, explicitPath)
@@ -118,8 +134,27 @@ func loadConfig(ctx context.Context, explicitPath, dataDirOverride string) (conf
 	if err != nil {
 		return config.Config{}, fmt.Errorf("load config from environment: %w", err)
 	}
-	cfg.App.DataDir = dir
+	if hasUsableProvider(cfg) || !stdinIsTerminal() {
+		cfg.App.DataDir = dir
+		return cfg, nil
+	}
+
+	cfg, err = onboardFirstRun(ctx, dir, os.Stdin, os.Stderr, onboarding.GatewayDiscoverer{})
+	if err != nil {
+		return config.Config{}, err
+	}
 	return cfg, nil
+}
+
+// stdinIsTerminal gates the first-run wizard: prompting a piped or closed
+// stdin would block a script forever, so a non-interactive run keeps the
+// environment fallback.
+func stdinIsTerminal() bool {
+	info, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+	return info.Mode()&os.ModeCharDevice != 0
 }
 
 // runTUI starts the interactive application.

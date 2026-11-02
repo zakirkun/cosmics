@@ -45,11 +45,12 @@ type Options struct {
 
 // Client talks to an OpenAI-compatible endpoint.
 type Client struct {
-	endpoint string
-	apiKey   string
-	http     *http.Client
-	retries  int
-	sleep    func(context.Context, time.Duration) error
+	endpoint       string
+	modelsEndpoint string
+	apiKey         string
+	http           *http.Client
+	retries        int
+	sleep          func(context.Context, time.Duration) error
 }
 
 // New validates the options and returns a client.
@@ -80,12 +81,15 @@ func New(opts Options) (*Client, error) {
 		timeout = DefaultTimeout
 	}
 
+	baseURL := strings.TrimRight(opts.BaseURL, "/")
+
 	return &Client{
-		endpoint: strings.TrimRight(opts.BaseURL, "/") + chatCompletionsPath,
-		apiKey:   opts.APIKey,
-		http:     &http.Client{Timeout: timeout},
-		retries:  opts.MaxRetries,
-		sleep:    sleepContext,
+		endpoint:       baseURL + chatCompletionsPath,
+		modelsEndpoint: baseURL + modelsPath,
+		apiKey:         opts.APIKey,
+		http:           &http.Client{Timeout: timeout},
+		retries:        opts.MaxRetries,
+		sleep:          sleepContext,
 	}, nil
 }
 
